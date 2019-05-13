@@ -1,0 +1,36 @@
+{
+  "generator-jhipster": {
+    "promptValues": {
+      "packageName": "com.rcd.iotsubsys",
+      "nativeLanguage": "zh-cn"
+    },
+    "jhipsterVersion": "5.7.2",
+    "applicationType": "monolith",
+    "baseName": "iot_knowledge_sub_system",
+    "packageName": "com.rcd.iotsubsys",
+    "packageFolder": "com/rcd/iotsubsys",
+    "serverPort": "8080",
+    "authenticationType": "jwt",
+    "cacheProvider": "no",
+    "websocket": false,
+    "databaseType": "sql",
+    "devDatabaseType": "h2Disk",
+    "prodDatabaseType": "mysql",
+    "searchEngine": false,
+    "messageBroker": false,
+    "serviceDiscoveryType": false,
+    "buildTool": "gradle",
+    "enableSwaggerCodegen": false,
+    "jwtSecretKey": "NmRlYTE4YjJhOWE1NDhhOTRjOGE2OTU5MTVlZWE1NjJmOTA3MTVhZGZlOWY1NTBlOTk0Y2QxZTc4ZWQ3ZDQxMTc5YzhiM2U4M2E5Y2NkNWFjMGNlYjdmYTc2NDIyMjU3ZDZiNWRkOTRkNzMyMjVhOTg1ZDM4M2NjNDhmOTE1NTE=",
+    "testFrameworks": [],
+    "jhiPrefix": "jhi",
+    "otherModules": [],
+    "enableTranslation": true,
+    "clientPackageManager": "npm",
+    "nativeLanguage": "zh-cn",
+    "languages": [
+      "zh-cn"
+    ],
+    "skipClient": true
+  }
+}
