@@ -25,43 +25,43 @@ public class KnowledgeInfo implements Serializable {
      * 所属领域id
      */
     @Column(name = "field_id", nullable = false)
-    private Long field_id;
+    private Long fieldId;
 
     /**
      * 所属领域name
      */
     @Column(name = "field_name", nullable = false, length = 15)
-    private String field_name;
+    private String fieldName;
 
     /**
      * 所属部门id
      */
     @Column(name = "department_id", nullable = false)
-    private Long department_id;
+    private Long departmentId;
 
     /**
      * 所属部门name
      */
     @Column(name = "department_name", nullable = false, length = 15)
-    private String department_name;
+    private String departmentName;
 
     /**
      * 所属元目录id
      */
     @Column(name = "meta_catalogue_id", nullable = false)
-    private Long meta_catalogue_id;
+    private Long metaCatalogueId;
 
     /**
      * 所属元目录name
      */
     @Column(name = "meta_catalogue_name", nullable = false, length = 15)
-    private String meta_catalogue_name;
+    private String metaCatalogueName;
 
     /**
      * 对应graphDB数据库的id
      */
-    @Column(name = "graph_id", nullable = false)
-    private String graph_id;
+    @Column(name = "graphId", nullable = false)
+    private String graphId;
 
     /**
      * 知识简介
@@ -86,60 +86,64 @@ public class KnowledgeInfo implements Serializable {
         this.name = name;
     }
 
-    public Long getField_id() {
-        return field_id;
+    public Long getFieldId() {
+        return fieldId;
     }
 
-    public void setField_id(Long field_id) {
-        this.field_id = field_id;
+    public void setFieldId(Long fieldId) {
+        this.fieldId = fieldId;
     }
 
     public String getField_name() {
-        return field_name;
+        return fieldName;
     }
 
-    public void setField_name(String field_name) {
-        this.field_name = field_name;
+    public String getFieldName() {
+        return fieldName;
     }
 
-    public Long getDepartment_id() {
-        return department_id;
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
-    public void setDepartment_id(Long department_id) {
-        this.department_id = department_id;
+    public Long getDepartmentId() {
+        return departmentId;
     }
 
-    public String getDepartment_name() {
-        return department_name;
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 
-    public void setDepartment_name(String department_name) {
-        this.department_name = department_name;
+    public String getDepartmentName() {
+        return departmentName;
     }
 
-    public Long getMeta_catalogue_id() {
-        return meta_catalogue_id;
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
-    public void setMeta_catalogue_id(Long meta_catalogue_id) {
-        this.meta_catalogue_id = meta_catalogue_id;
+    public Long getMetaCatalogueId() {
+        return metaCatalogueId;
     }
 
-    public String getMeta_catalogue_name() {
-        return meta_catalogue_name;
+    public void setMetaCatalogueId(Long metaCatalogueId) {
+        this.metaCatalogueId = metaCatalogueId;
     }
 
-    public void setMeta_catalogue_name(String meta_catalogue_name) {
-        this.meta_catalogue_name = meta_catalogue_name;
+    public String getMetaCatalogueName() {
+        return metaCatalogueName;
     }
 
-    public String getGraph_id() {
-        return graph_id;
+    public void setMetaCatalogueName(String metaCatalogueName) {
+        this.metaCatalogueName = metaCatalogueName;
     }
 
-    public void setGraph_id(String graph_id) {
-        this.graph_id = graph_id;
+    public String getGraphId() {
+        return graphId;
+    }
+
+    public void setGraphId(String graphId) {
+        this.graphId = graphId;
     }
 
     public String getKnowledge_synopsis() {
