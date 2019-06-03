@@ -67,16 +67,7 @@ public class KnowledgeInfo implements Serializable {
      * 知识简介
      */
     @Column(name = "knowledge_synopsis", length = 100)
-    private String knowledge_synopsis;
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private String knowledgeSynopsis;
 
     public String getName() {
         return name;
@@ -92,10 +83,6 @@ public class KnowledgeInfo implements Serializable {
 
     public void setFieldId(Long fieldId) {
         this.fieldId = fieldId;
-    }
-
-    public String getField_name() {
-        return fieldName;
     }
 
     public String getFieldName() {
@@ -146,11 +133,11 @@ public class KnowledgeInfo implements Serializable {
         this.graphId = graphId;
     }
 
-    public String getKnowledge_synopsis() {
-        return knowledge_synopsis;
+    public String getKnowledgeSynopsis() {
+        return knowledgeSynopsis;
     }
 
-    public void setKnowledge_synopsis(String knowledge_synopsis) {
-        this.knowledge_synopsis = knowledge_synopsis;
+    public void setKnowledgeSynopsis(String knowledgeSynopsis) {
+        this.knowledgeSynopsis = knowledgeSynopsis;
     }
 }
