@@ -3,16 +3,18 @@ package com.rcd.iotsubsys.web.rest.knowledge;
 import com.codahale.metrics.annotation.Timed;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeInfo;
 import com.rcd.iotsubsys.service.knowledge.KnowledgeInfoListService;
+import com.rcd.iotsubsys.web.rest.util.GraphDBCommon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 知识列表
@@ -21,8 +23,8 @@ import java.util.List;
 @RequestMapping("/api/knowledge/infoList")
 public class KnowledgeInfoListResource {
 
+    private static String graphName = "";
     private final Logger log = LoggerFactory.getLogger(KnowledgeInfoListResource.class);
-
     private final KnowledgeInfoListService knowledgeInfoListService;
 
     public KnowledgeInfoListResource(KnowledgeInfoListService knowledgeInfoListService) {
@@ -47,17 +49,61 @@ public class KnowledgeInfoListResource {
         return ResponseEntity.ok(knowledgeInfo);
     }
 
-//    @PostMapping("/by")
-//    @Timed
-//    public ResponseEntity<List<KnowledgeInfo>> getKnowledgeList(@RequestBody String name,@RequestBody String field_name,@RequestBody String department_name,@RequestBody String meta_catalogue_name) {
+    @PostMapping("/insertToMysql")
+    @Timed
+    public ResponseEntity<Map<String, Object>> insertToMysql(@RequestBody Map<String, Object> mapdata) throws URISyntaxException {
 
-//        List<KnowledgeInfo> knowledgeInfo = knowledgeInfoListService.getKnowledgeListBySelect(name,field_name,department_name,meta_catalogue_name);
-//
-//        if(knowledgeInfo == null){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//        return ResponseEntity.ok(knowledgeInfo);
-//    }
+        graphName = (String) mapdata.get("graphName");
+        Map<String, Object> result = knowledgeInfoListService.insertToMysql(mapdata);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/insertToGraphdb")
+    @Timed
+    public ResponseEntity<Map<String, Object>> insertToGraphdb(@RequestBody MultipartFile file) {
+
+        try {
+            File f = null;
+            InputStream ins = file.getInputStream();
+            f = new File(file.getOriginalFilename());
+            inputStreamToFile(ins, f);
+
+            GraphDBCommon.insertGraphDB(graphName, f);
+
+            File del = new File(f.toURI());
+            del.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        Map<String,Object> result = knowledgeInfoListService.insertToMysql(mapdata);
+        return ResponseEntity.status(HttpStatus.CREATED).body(null);
+    }
+
+    @GetMapping("/sparqlSelect")
+    @Timed
+    public ResponseEntity<List<Map<String,Object>>> sparqlSelect(@RequestParam(required = false) String sparql) {
+
+        List<Map<String,Object>> result = GraphDBCommon.selectGraphDB(sparql);
+
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(result);
+    }
 
 
+    public static void inputStreamToFile(InputStream ins, File file) {
+        try {
+            OutputStream os = new FileOutputStream(file);
+            int bytesRead = 0;
+            byte[] buffer = new byte[8192];
+            while ((bytesRead = ins.read(buffer, 0, 8192)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            os.close();
+            ins.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

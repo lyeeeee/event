@@ -21,4 +21,8 @@ public interface DirectoryManagementRepository extends JpaRepository<DirectoryMa
 
     @Query(value = "select name as label,id as value,parent_id  from knowledge_directory_management where type = '02' ",nativeQuery = true)
     List<Map<String,Object>> findDepartment();
+
+    @Query(value = "select name as label,id as value,parent_id  from knowledge_directory_management where type = '02' ",nativeQuery = true)
+    List<Map<String,Object>> findParent();
+
 }

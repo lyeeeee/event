@@ -1,22 +1,29 @@
 package com.rcd.iotsubsys.service.knowledge;
 
+import com.rcd.iotsubsys.domain.knowledge.DirectoryManagement;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeInfo;
+import com.rcd.iotsubsys.repository.knowledge.DirectoryManagementRepository;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeInfoListRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class KnowledgeInfoListService {
 
     private final KnowledgeInfoListRepository knowledgeInfoListRepository;
+    private final DirectoryManagementRepository directoryManagementRepository;
 
-    public KnowledgeInfoListService(KnowledgeInfoListRepository knowledgeInfoListRepository) {
+    public KnowledgeInfoListService(KnowledgeInfoListRepository knowledgeInfoListRepository,DirectoryManagementRepository directoryManagementRepository) {
         this.knowledgeInfoListRepository = knowledgeInfoListRepository;
+        this.directoryManagementRepository = directoryManagementRepository;
     }
 
     public KnowledgeInfo getKnowledgeListByName(String name){
@@ -38,5 +45,29 @@ public class KnowledgeInfoListService {
 
         return knowledgeInfoListRepository.findAll(ex);
     }
+
+    public Map<String,Object> insertToMysql(Map<String,Object> map){
+        Map<String,Object> result = new HashMap<>();
+        result.put("success",false);
+        //查询元目录的父信息
+        Optional<DirectoryManagement> optional = directoryManagementRepository.findById(Long.parseLong(map.get("metaId").toString()));
+        //插入
+        KnowledgeInfo knowledgeInfo = new KnowledgeInfo();
+        knowledgeInfo.setName((String)map.get("name"));
+        knowledgeInfo.setDepartmentId(optional.get().getParent().getId());
+        knowledgeInfo.setDepartmentName(optional.get().getParent().getName());
+        knowledgeInfo.setFieldId(optional.get().getParent().getParent().getId());
+        knowledgeInfo.setFieldName(optional.get().getParent().getParent().getName());
+        knowledgeInfo.setMetaCatalogueId(optional.get().getId());
+        knowledgeInfo.setMetaCatalogueName(optional.get().getName());
+        knowledgeInfo.setKnowledgeSynopsis((String)map.get("knowledgeSynopsis"));
+        knowledgeInfo.setGraphId((String)map.get("graphName"));
+
+        knowledgeInfoListRepository.save(knowledgeInfo);
+
+        result.put("success",true);
+        return result;
+    }
+
 
 }
