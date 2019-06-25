@@ -43,7 +43,7 @@ public class GraphDBCommon {
     }
 
     //根据图名查询
-    public List<Map<String,Object>> selectGraphDBByGraphName(String GraphName){
+    public static List<Map<String,Object>> selectGraphDBByGraphName(String GraphName){
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection con = repository.getConnection();
@@ -56,10 +56,10 @@ public class GraphDBCommon {
                 Map<String,Object> map = new HashMap<>();
                 Statement st = result.next();
                 // do something interesting with the result
-                map.put("o",st.getObject());
-                map.put("p",st.getPredicate());
-                map.put("s",st.getSubject());
-                map.put("c",st.getContext());
+//                map.put("s",st.getSubject());
+                map.put("attribute",st.getObject().stringValue());
+                map.put("equipment",st.getPredicate().stringValue());
+                map.put("graphName",st.getContext().stringValue());
                 resultList.add(map);
             }
         }
@@ -91,7 +91,29 @@ public class GraphDBCommon {
         }
         return resultList;
     }
+    public static List<Map<String,Object>> selectGraphDB1(String sparql){
+//        String sparql = "SELECT  ?s ?p ?o ?src FROM NAMED <http://csshi> where { Graph ?src{ ?s ?p ?o }}";
+        Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
+        repository.initialize();
+        RepositoryConnection con = repository.getConnection();
+        List<Map<String,Object>> resultList = new ArrayList<>();
 
+        try (RepositoryConnection conn = repository.getConnection()) {
+            TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, sparql);
+            try (TupleQueryResult result = tupleQuery.evaluate()) {
+                while (result.hasNext()) {  // iterate over the result
+                    Map<String,Object> map = new HashMap<>();
+                    BindingSet bindingSet = result.next();
+                    map.put("o",bindingSet.getValue("o").stringValue());
+                    map.put("p",bindingSet.getValue("p").stringValue());
+                    map.put("src",bindingSet.getValue("src").stringValue());
+                    resultList.add(map);
+                }
+            }
+
+        }
+        return resultList;
+    }
 
 
 

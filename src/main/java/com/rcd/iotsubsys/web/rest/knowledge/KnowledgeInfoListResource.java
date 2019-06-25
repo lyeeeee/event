@@ -2,6 +2,7 @@ package com.rcd.iotsubsys.web.rest.knowledge;
 
 import com.codahale.metrics.annotation.Timed;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeInfo;
+import com.rcd.iotsubsys.service.event.AttributeRelationEquipmentService;
 import com.rcd.iotsubsys.service.knowledge.KnowledgeInfoListService;
 import com.rcd.iotsubsys.web.rest.util.GraphDBCommon;
 import org.slf4j.Logger;
@@ -26,9 +27,11 @@ public class KnowledgeInfoListResource {
     private static String graphName = "";
     private final Logger log = LoggerFactory.getLogger(KnowledgeInfoListResource.class);
     private final KnowledgeInfoListService knowledgeInfoListService;
+    private final AttributeRelationEquipmentService attributeRelationEquipmentService;
 
-    public KnowledgeInfoListResource(KnowledgeInfoListService knowledgeInfoListService) {
+    public KnowledgeInfoListResource(KnowledgeInfoListService knowledgeInfoListService, AttributeRelationEquipmentService attributeRelationEquipmentService) {
         this.knowledgeInfoListService = knowledgeInfoListService;
+        this.attributeRelationEquipmentService = attributeRelationEquipmentService;
     }
 
     @GetMapping()
@@ -76,6 +79,10 @@ public class KnowledgeInfoListResource {
             e.printStackTrace();
         }
 //        Map<String,Object> result = knowledgeInfoListService.insertToMysql(mapdata);
+        String sparql = "SELECT distinct ?p ?o ?src FROM NAMED <"+graphName+"> where { Graph ?src{ ?s ?p ?o }}";
+        List<Map<String,Object>> result = GraphDBCommon.selectGraphDB1(sparql);
+        attributeRelationEquipmentService.insertAllRelation(result);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
     }
 
