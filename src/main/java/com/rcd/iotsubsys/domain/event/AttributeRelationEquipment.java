@@ -1,8 +1,6 @@
 package com.rcd.iotsubsys.domain.event;
 
 import javax.persistence.*;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * owl文件中解析出的设备与属性的对应关系表
@@ -19,7 +17,7 @@ public class AttributeRelationEquipment {
     /**
      * 对应graphDB数据库的图名
      */
-    @Column(name = "graphName", nullable = false)
+    @Column(name = "graph_name", nullable = false)
     private String graphName;
 
     /**
@@ -31,15 +29,29 @@ public class AttributeRelationEquipment {
     /**
      * 属性
      */
-    @Column(name = "attribute",columnDefinition="varchar(500)")
+    @Column(name = "attribute", nullable = false)
     private String attribute;
+
+    /**
+     * 系统
+     */
+    @Column(name = "iot_system", nullable = false)
+    private String iotSystem;
+
+    /**
+     * 子站
+     */
+    @Column(name = "subsites", nullable = false)
+    private String subsites;
+
+    /**
+     * 子系统
+     */
+    @Column(name = "subsystem", nullable = false)
+    private String subsystem;
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getGraphName() {
@@ -64,5 +76,29 @@ public class AttributeRelationEquipment {
 
     public void setAttribute(String attribute) {
         this.attribute = attribute;
+    }
+
+    public String getIotSystem() {
+        return iotSystem;
+    }
+
+    public void setIotSystem(String iotSystem) {
+        this.iotSystem = iotSystem;
+    }
+
+    public String getSubsites() {
+        return subsites;
+    }
+
+    public void setSubsites(String subsites) {
+        this.subsites = subsites;
+    }
+
+    public String getSubsystem() {
+        return subsystem;
+    }
+
+    public void setSubsystem(String subsystem) {
+        this.subsystem = subsystem;
     }
 }

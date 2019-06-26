@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public class HandleOwlUtil {
-    public final static String GRAPHDB_SERVER = "http://10.255.4.233:7200/";
-    //    public final static String GRAPHDB_SERVER = "http://192.168.2.138:7200/";
+//    public final static String GRAPHDB_SERVER = "http://10.255.4.233:7200/";
+        public final static String GRAPHDB_SERVER = "http://192.168.2.95:7200/";
     public final static String REPOSITORY_ID = "IOTKnowledge";
 
 
@@ -34,8 +34,8 @@ public class HandleOwlUtil {
      *
      * @return
      */
-    public static List<Map<String, Object>> selectNamedIndividual() {
-        String namedIndividual = "SELECT ?s ?p ?src FROM NAMED <http://csshi> where { Graph ?src{ ?s ?p " + NAMED_INDIVIDUAL + " }}";
+    public static List<Map<String, Object>> selectNamedIndividual(String graphName) {
+        String namedIndividual = "SELECT ?s ?p ?src FROM NAMED <"+graphName+"> where { Graph ?src{ ?s ?p " + NAMED_INDIVIDUAL + " }}";
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection con = repository.getConnection();
@@ -64,8 +64,8 @@ public class HandleOwlUtil {
      * @param s
      * @return
      */
-    public static List<Map<String, Object>> selectEquipInfo(String s) {
-        String namedIndividual = "SELECT ?o ?src FROM NAMED <http://csshi> where { Graph ?src{ <" + s + ">" + LOCATE + " ?o }}";
+    public static List<Map<String, Object>> selectEquipInfo(String s,String graphName) {
+        String namedIndividual = "SELECT ?o ?src FROM NAMED <"+graphName+"> where { Graph ?src{ <" + s + ">" + LOCATE + " ?o }}";
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection con = repository.getConnection();
@@ -94,8 +94,8 @@ public class HandleOwlUtil {
      * @param s
      * @return
      */
-    public static List<Map<String, Object>> selectAttribute(String s) {
-        String sparql = "SELECT ?o ?src FROM NAMED <http://csshi> where { Graph ?src{ <" + s + ">" + HAS_PROPERTY + " ?o }}";
+    public static List<Map<String, Object>> selectAttribute(String s,String graphName) {
+        String sparql = "SELECT ?o ?src FROM NAMED <"+graphName+"> where { Graph ?src{ <" + s + ">" + HAS_PROPERTY + " ?o }}";
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection con = repository.getConnection();
@@ -117,10 +117,10 @@ public class HandleOwlUtil {
     }
 
 
-    public static String selectSubsystem(String s) {
+    public static String selectSubsystem(String s, String graphName) {
         String nextS = "";
         String resultS = "";
-        String sparql = "SELECT ?o ?src FROM NAMED <http://csshi> where { Graph ?src{ <" + s + ">" + TYPE + " ?o FILTER (?o != " + NAMED_INDIVIDUAL + ") }}";
+        String sparql = "SELECT ?o ?src FROM NAMED <"+graphName+"> where { Graph ?src{ <" + s + ">" + TYPE + " ?o FILTER (?o != " + NAMED_INDIVIDUAL + ") }}";
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection con = repository.getConnection();
@@ -138,14 +138,14 @@ public class HandleOwlUtil {
                 }
             }
         }
-        resultS = selectSubSystem2(nextS);
+        resultS = selectSubSystem2(nextS,graphName);
 
         return resultS;
     }
 
-    public static String selectSubSystem2(String s) {
+    public static String selectSubSystem2(String s,String graphName) {
         String nexts = "";
-        String sparql = "SELECT distinct ?o  ?src FROM NAMED <http://ceshi612> where { Graph ?src{ <" + s + "> " + SUB_CLASS_OF + " ?o}}";
+        String sparql = "SELECT distinct ?o  ?src FROM NAMED <"+graphName+"> where { Graph ?src{ <" + s + "> " + SUB_CLASS_OF + " ?o}}";
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
         RepositoryConnection con = repository.getConnection();
@@ -165,30 +165,32 @@ public class HandleOwlUtil {
         if ("http://www.w3.org/ns/sosa/FeatureOfInterest".equals(nexts)) {
             return s;
         }
-        return selectSubSystem2(nexts);
+        return selectSubSystem2(nexts,graphName);
     }
 
-    public static List<Map<String, Object>> HandleOwl() {
+    public static List<Map<String, Object>> HandleOwl(String graphName) {
         List<Map<String, Object>> resultList = new ArrayList<>();
         //获取所有的namedIndividual后遍历处理
-        List<Map<String, Object>> namedIndividual = selectNamedIndividual();
+        List<Map<String, Object>> namedIndividual = selectNamedIndividual(graphName);
         for (Map<String, Object> namedIndividualMap : namedIndividual) {
 
             //以当前的s作为主语，locate作谓语，查询是否存在，存在则为设备
-            List<Map<String, Object>> locateList = selectEquipInfo(namedIndividualMap.get("s").toString());
+            List<Map<String, Object>> locateList = selectEquipInfo(namedIndividualMap.get("s").toString(),graphName);
             if (locateList == null || locateList.size() == 0) {//为空则不是设备，跳出进行下一次循环
                 continue;
             }
             //不为空则是设备
             //获取属性
-            List<Map<String, Object>> attributeList = selectAttribute(namedIndividualMap.get("s").toString());
+            List<Map<String, Object>> attributeList = selectAttribute(namedIndividualMap.get("s").toString(),graphName);
             for (Map<String, Object> attributeMap : attributeList) {
                 Map<String, Object> resultMap = new HashMap<>();
-                resultMap.put("src", namedIndividualMap.get("src"));//设备
-                resultMap.put("shebei", namedIndividualMap.get("s"));//设备
-                resultMap.put("zizhan", locateList.get(0).get("o"));//子站
-                resultMap.put("zixitong", selectSubsystem(namedIndividualMap.get("s").toString()));//子系统
+                resultMap.put("src", namedIndividualMap.get("src"));//图名
+                resultMap.put("equipment", namedIndividualMap.get("s"));//设备
+                resultMap.put("subsites", locateList.get(0).get("o"));//子站
+                resultMap.put("subsystem", selectSubsystem(namedIndividualMap.get("s").toString(),graphName));//子系统
                 resultMap.put("attribute", attributeMap.get("o"));//属性
+
+                resultMap.put("system", "授时系统");//系统
 
                 resultList.add(resultMap);
             }

@@ -89,6 +89,66 @@ public class MetaEventInfoListResource {
         }
         return ResponseEntity.ok(directoryInfo);
     }
+    //获取知识List
+    @GetMapping("/getIotList")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getIotList() {
+        List<Map<String, Object>> iotList = metaEventInfoListService.getIotList();
+        if (iotList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(iotList);
+    }
+    //获取系统List
+    @GetMapping("/getSystemList")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getSystemList(@RequestParam(required = false) String graph_name) {
+        List<Map<String, Object>> iotList = metaEventInfoListService.getSystemList(graph_name);
+        if (iotList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(iotList);
+    }
+    //获取子站List
+    @GetMapping("/getSubsitesList")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getSubsitesList(@RequestParam(required = false) String iot_system) {
+        List<Map<String, Object>> iotList = metaEventInfoListService.getSubsitesList(iot_system);
+        if (iotList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(iotList);
+    }
+    //获取子系统List
+    @GetMapping("/getSubsystemList")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getSubsystemList(@RequestParam(required = false) String subsites) {
+        List<Map<String, Object>> iotList = metaEventInfoListService.getSubsystemList(subsites);
+        if (iotList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(iotList);
+    }
+    //获取设备List
+    @GetMapping("/getEquipmentList")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getEquipmentList(@RequestParam(required = false) String subsystem) {
+        List<Map<String, Object>> iotList = metaEventInfoListService.getEquipmentList(subsystem);
+        if (iotList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(iotList);
+    }
+    //获取属性List
+    @GetMapping("/getAttributeList")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getAttributeList(@RequestParam(required = false) String equipment) {
+        List<Map<String, Object>> iotList = metaEventInfoListService.getAttributeList(equipment);
+        if (iotList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(iotList);
+    }
     //新增对应关系
     @PostMapping("/addRelation")
     @Timed

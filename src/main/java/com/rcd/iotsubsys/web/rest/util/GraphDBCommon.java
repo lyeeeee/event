@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class GraphDBCommon {
 //    public final static String GRAPHDB_SERVER = "http://10.255.1.150:7200/";
-    public final static String GRAPHDB_SERVER = "http://192.168.2.138:7200/";
+    public final static String GRAPHDB_SERVER = "http://192.168.2.95:7200/";
     public final static String REPOSITORY_ID = "IOTKnowledge";
 
     public static void insertGraphDB(String graphName,File file) {

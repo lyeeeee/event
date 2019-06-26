@@ -23,9 +23,14 @@ public class AttributeRelationEquipmentService {
         List<AttributeRelationEquipment> RelationList = new ArrayList<>();
         for (Map<String ,Object> map : list) {
             AttributeRelationEquipment attributeRelationEquipment = new AttributeRelationEquipment();
-            attributeRelationEquipment.setAttribute((String) map.get("o"));
-            attributeRelationEquipment.setEquipment((String) map.get("p"));
+
+            attributeRelationEquipment.setAttribute((String) map.get("attribute"));
+            attributeRelationEquipment.setEquipment((String) map.get("equipment"));
+            attributeRelationEquipment.setSubsites((String) map.get("subsites"));
+            attributeRelationEquipment.setSubsystem((String) map.get("attribute"));
+            attributeRelationEquipment.setIotSystem((String) map.get("system"));
             attributeRelationEquipment.setGraphName((String) map.get("src"));
+
             RelationList.add(attributeRelationEquipment);
         }
 

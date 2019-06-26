@@ -2,7 +2,6 @@ package com.rcd.iotsubsys.service.event;
 
 import com.rcd.iotsubsys.domain.event.AttributeRelationMetaEvent;
 import com.rcd.iotsubsys.domain.event.MetaEvent;
-import com.rcd.iotsubsys.repository.event.AttributeRelationEquipmentRepository;
 import com.rcd.iotsubsys.repository.event.AttributeRelationMetaEventRepository;
 import com.rcd.iotsubsys.repository.event.MetaEventInfoListRepository;
 import org.springframework.data.domain.Example;
@@ -52,12 +51,37 @@ public class MetaEventInfoListService {
             metaEventInfoListRepository.delete(metaEvent);
         });
     }
+
     //查询对应关系
     public List<AttributeRelationMetaEvent> getRelationList(String relationId) {
         return attributeRelationMetaEventRepository.findAllByMetaEventId(relationId);
     }
+    //查询知识
+    public List<Map<String, Object>> getIotList() {
+        return metaEventInfoListRepository.findIot();
+    }
+    //查询系统
+    public List<Map<String, Object>> getSystemList(String graph_name) {
+        return metaEventInfoListRepository.findSystem(graph_name);
+    }
+    //查询子站
+    public List<Map<String, Object>> getSubsitesList(String iot_system) {
+        return metaEventInfoListRepository.findSubsites(iot_system);
+    }
+    //查询子系统
+    public List<Map<String, Object>> getSubsystemList(String subsites) {
+        return metaEventInfoListRepository.findSubsystem(subsites);
+    }
+    //查询设备
+    public List<Map<String, Object>> getEquipmentList(String subsystem) {
+        return metaEventInfoListRepository.findEquipment(subsystem);
+    }
+    //查询属性
+    public List<Map<String, Object>> getAttributeList(String equipment) {
+        return metaEventInfoListRepository.findAttribute(equipment);
+    }
 
-    public List<Map<String, Object>> getSelect(){
+    public List<Map<String, Object>> getSelect() {
         List<Map<String, Object>> equipmentList = attributeRelationMetaEventRepository.findEquipment();
         List<Map<String, Object>> attributeList = attributeRelationMetaEventRepository.findAttribute();
 
@@ -70,25 +94,27 @@ public class MetaEventInfoListService {
             for (Map<String, Object> attributeMap : attributeList) {
                 Map<String, Object> map = new HashMap<>();
 
-                if (equipMap.get("equipment").toString().equals(attributeMap.get("equipment").toString())){
-                    map.put("value",attributeMap.get("attribute"));
-                    map.put("label",attributeMap.get("attribute"));
-                    map.put("isLeaf",true);
+                if (equipMap.get("equipment").toString().equals(attributeMap.get("equipment").toString())) {
+                    map.put("value", attributeMap.get("attribute"));
+                    map.put("label", attributeMap.get("attribute"));
+                    map.put("isLeaf", true);
                     list.add(map);
                 }
             }
-            resultMap.put("value",equipMap.get("equipment"));
-            resultMap.put("label",equipMap.get("equipment"));
-            resultMap.put("children",list);
+            resultMap.put("value", equipMap.get("equipment"));
+            resultMap.put("label", equipMap.get("equipment"));
+            resultMap.put("children", list);
             resultList.add(resultMap);
         }
         return resultList;
     }
+
     //新增对应关系
     public AttributeRelationMetaEvent addRelation(AttributeRelationMetaEvent attributeRelationMetaEvent) {
 
         return attributeRelationMetaEventRepository.save(attributeRelationMetaEvent);
     }
+
     //删除对应关系
     public void deleteRelation(Long id) {
         attributeRelationMetaEventRepository.findById(id).ifPresent(attributeRelationMetaEvent -> {

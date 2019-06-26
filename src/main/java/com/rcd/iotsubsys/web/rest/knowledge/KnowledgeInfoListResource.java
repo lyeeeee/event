@@ -5,6 +5,7 @@ import com.rcd.iotsubsys.domain.knowledge.KnowledgeInfo;
 import com.rcd.iotsubsys.service.event.AttributeRelationEquipmentService;
 import com.rcd.iotsubsys.service.knowledge.KnowledgeInfoListService;
 import com.rcd.iotsubsys.web.rest.util.GraphDBCommon;
+import com.rcd.iotsubsys.web.rest.util.HandleOwlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -79,8 +80,8 @@ public class KnowledgeInfoListResource {
             e.printStackTrace();
         }
 //        Map<String,Object> result = knowledgeInfoListService.insertToMysql(mapdata);
-        String sparql = "SELECT distinct ?p ?o ?src FROM NAMED <"+graphName+"> where { Graph ?src{ ?s ?p ?o }}";
-        List<Map<String,Object>> result = GraphDBCommon.selectGraphDB1(sparql);
+//        String sparql = "SELECT distinct ?p ?o ?src FROM NAMED <"+graphName+"> where { Graph ?src{ ?s ?p ?o }}";
+        List<Map<String,Object>> result = HandleOwlUtil.HandleOwl(graphName);
         attributeRelationEquipmentService.insertAllRelation(result);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(null);
