@@ -33,6 +33,13 @@ public class AttributeRelationComplexEvent {
     private String attributeName;
 
     /**
+     * 属性关系
+     * 0：小于；1：小于等于；2：等于；3：大于等于；4：大于
+     */
+    @Column(name = "attribute_relation")
+    private String attributeRelation;
+
+    /**
      * 属性值
      */
     @Column(name = "attribute_value")
@@ -91,5 +98,13 @@ public class AttributeRelationComplexEvent {
 
     public void setMetaEventId(String metaEventId) {
         this.metaEventId = metaEventId;
+    }
+
+    public String getAttributeRelation() {
+        return attributeRelation;
+    }
+
+    public void setAttributeRelation(String attributeRelation) {
+        this.attributeRelation = attributeRelation;
     }
 }
