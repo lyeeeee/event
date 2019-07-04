@@ -10,6 +10,7 @@ import java.util.List;
 public interface AttributeRelationComplexEventRepository extends JpaRepository<AttributeRelationComplexEvent, Long> {
 
     List<AttributeRelationComplexEvent> findAllByComplexEventIdAndType(String complexId,String type);
+    List<AttributeRelationComplexEvent> findAllByComplexEventIdAndTypeNotOrderByType(String complexId,String type);
 
 
 }

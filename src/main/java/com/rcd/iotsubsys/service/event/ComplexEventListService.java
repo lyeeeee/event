@@ -24,7 +24,7 @@ public class ComplexEventListService {
         this.attributeRelationComplexEventRepository = attributeRelationComplexEventRepository;
     }
 
-    //查询原子事件
+    //查询复杂事件
     public List<ComplexEvent> getComplexEventListBySelect(String name) {
 
         ComplexEvent complexEvent = new ComplexEvent();
@@ -35,17 +35,26 @@ public class ComplexEventListService {
         return complexEventListRepository.findAll(ex);
     }
 
-    //增改原子事件
+    //增改复杂事件
     public ComplexEvent save(ComplexEvent metaEvent) {
         Date ss = new Date();
         SimpleDateFormat format0 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time = format0.format(ss.getTime());
+        if("subsites".equals(metaEvent.getMetaEventCompany())){
+            metaEvent.setMetaEventCompany("子站");
+        }else if("subsystem".equals(metaEvent.getMetaEventCompany())){
+            metaEvent.setMetaEventCompany("子系统");
+        }else if("equipment".equals(metaEvent.getMetaEventCompany())){
+            metaEvent.setMetaEventCompany("设备");
+        }else if("attribute".equals(metaEvent.getMetaEventCompany())){
+            metaEvent.setMetaEventCompany("属性");
+        }
 
         metaEvent.setInsertTime(time);
         return complexEventListRepository.save(metaEvent);
     }
 
-    //删除原子事件
+    //删除复杂事件
     public void deleteComplexEvent(Long id) {
         complexEventListRepository.findById(id).ifPresent(metaEvent -> {
             complexEventListRepository.delete(metaEvent);
@@ -65,7 +74,9 @@ public class ComplexEventListService {
         for (AttributeRelationComplexEvent a : list) {
             Map<String, Object> resultMap = new HashMap<>();
             Map<String, Object> map = complexEventListRepository.getMetaInfo(a.getMetaEventId());
-            if (map.isEmpty()) { continue; }
+            if (map.isEmpty()) {
+                continue;
+            }
             resultMap.put("id", a.getId());//涉及到删除问题，暂时先这样写。
             resultMap.put("name", map.get("name"));
             resultMap.put("synopsis", map.get("synopsis"));
@@ -93,9 +104,22 @@ public class ComplexEventListService {
 
     //获取属性关系列表
     public List<AttributeRelationComplexEvent> getAttributeList(String relationId) {
-        String type = "1";
-        return attributeRelationComplexEventRepository.findAllByComplexEventIdAndType(relationId, type);
+        String type = "0";
+        return attributeRelationComplexEventRepository.findAllByComplexEventIdAndTypeNotOrderByType(relationId, type);
     }
 
+    //获取原子事件范围
+    public List<Map<String, Object>> getMetaEventRange(String type) {
+        if("subsites".equals(type)){
+            return  complexEventListRepository.findSubsites();
+        }else if ("subsystem".equals(type)){
+            return  complexEventListRepository.findSubsystem();
+        }else if ("equipment".equals(type)){
+            return  complexEventListRepository.findEquipment();
+        }else if ("attribute".equals(type)){
+            return  complexEventListRepository.findAttribute();
+        }
+        return new ArrayList<>();
+    }
 
 }

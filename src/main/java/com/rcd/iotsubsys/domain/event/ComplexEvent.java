@@ -35,6 +35,17 @@ public class ComplexEvent {
     @Column(name = "insert_time")
     private String insertTime;
 
+    /**
+     * 原子事件单位
+     */
+    @Column(name = "meta_event_company")
+    private String metaEventCompany;
+    /**
+     * 原子事件范围
+     */
+    @Column(name = "meta_event_range")
+    private String metaEventRange;
+
 
     public Long getId() {
         return id;
@@ -66,5 +77,21 @@ public class ComplexEvent {
 
     public void setInsertTime(String insertTime) {
         this.insertTime = insertTime;
+    }
+
+    public String getMetaEventCompany() {
+        return metaEventCompany;
+    }
+
+    public void setMetaEventCompany(String metaEventCompany) {
+        this.metaEventCompany = metaEventCompany;
+    }
+
+    public String getMetaEventRange() {
+        return metaEventRange;
+    }
+
+    public void setMetaEventRange(String metaEventRange) {
+        this.metaEventRange = metaEventRange;
     }
 }

@@ -21,7 +21,7 @@ public class AttributeRelationComplexEvent {
     private String complexEventId;
 
     /**
-     * type 0:代表所选原子事件；1:代表属性
+     * type 0:代表所选原子事件；1:代表属性；2:代表目标
      */
     @Column(name = "type", nullable = false)
     private String type;

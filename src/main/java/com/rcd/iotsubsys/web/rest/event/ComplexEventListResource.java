@@ -122,7 +122,16 @@ public class ComplexEventListResource {
         complexEventListService.deleteMeta(id);
         return ResponseEntity.ok().headers(HeaderUtil.createAlert("directory.deleted", id.toString())).build();
     }
-
+    //获取原子事件范围List
+    @GetMapping("/getMetaEventRange")
+    @Timed
+    public ResponseEntity<List<Map<String, Object>>> getMetaEventRange(@RequestParam(required = false) String type) {
+        List<Map<String, Object>> list = complexEventListService.getMetaEventRange(type);
+        if (list == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(list);
+    }
 
     
 }
