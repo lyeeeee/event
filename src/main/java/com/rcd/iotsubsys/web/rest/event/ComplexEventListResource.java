@@ -70,9 +70,9 @@ public class ComplexEventListResource {
     //获取所选原子事件列表
     @GetMapping("/getMetaList")
     @Timed
-    public ResponseEntity<List<Map<String, Object>>> getMetaList(@RequestParam(required = false) String complexId) {
+    public ResponseEntity<List<AttributeRelationComplexEvent>> getMetaList(@RequestParam(required = false) String complexId) {
 
-        List<Map<String, Object>> attributeRelationComplexEvents = complexEventListService.getMetaList(complexId);
+        List<AttributeRelationComplexEvent> attributeRelationComplexEvents = complexEventListService.getMetaList(complexId);
 
 //        if (attributeRelationComplexEvents == null) {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);

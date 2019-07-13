@@ -37,11 +37,13 @@ public class ComplexEvent {
 
     /**
      * 原子事件单位
+     * 7.11修改，原子事件改为选择范围并可以选择多个，此字段废弃不用。暂时先不删除
      */
     @Column(name = "meta_event_company")
     private String metaEventCompany;
     /**
      * 原子事件范围
+     * 7.11修改，原子事件改为选择范围并可以选择多个，此字段废弃不用。暂时先不删除
      */
     @Column(name = "meta_event_range")
     private String metaEventRange;

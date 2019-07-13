@@ -67,26 +67,26 @@ public class ComplexEventListService {
     }
 
     //获取所选原子事件列表
-    public List<Map<String, Object>> getMetaList(String complexId) {
+    public List<AttributeRelationComplexEvent> getMetaList(String complexId) {
         String type = "0";
         List<AttributeRelationComplexEvent> list = attributeRelationComplexEventRepository.findAllByComplexEventIdAndType(complexId, type);
-        List<Map<String, Object>> resultList = new ArrayList<>();
-        for (AttributeRelationComplexEvent a : list) {
-            Map<String, Object> resultMap = new HashMap<>();
-            Map<String, Object> map = complexEventListRepository.getMetaInfo(a.getMetaEventId());
-            if (map.isEmpty()) {
-                continue;
-            }
-            resultMap.put("id", a.getId());//涉及到删除问题，暂时先这样写。
-            resultMap.put("name", map.get("name"));
-            resultMap.put("synopsis", map.get("synopsis"));
-            resultList.add(resultMap);
-
-        }
-        if (resultList == null || resultList.size() < 1) {
-            return new ArrayList<>();
-        }
-        return resultList;
+//        List<Map<String, Object>> resultList = new ArrayList<>();
+//        for (AttributeRelationComplexEvent a : list) {
+//            Map<String, Object> resultMap = new HashMap<>();
+//            Map<String, Object> map = complexEventListRepository.getMetaInfo(a.getMetaEventId());
+//            if (map.isEmpty()) {
+//                continue;
+//            }
+//            resultMap.put("id", a.getId());//涉及到删除问题，暂时先这样写。
+//            resultMap.put("name", map.get("name"));
+//            resultMap.put("synopsis", map.get("synopsis"));
+//            resultList.add(resultMap);
+//
+//        }
+//        if (resultList == null || resultList.size() < 1) {
+//            return new ArrayList<>();
+//        }
+        return list;
     }
 
     //新增所选原子事件
@@ -104,8 +104,8 @@ public class ComplexEventListService {
 
     //获取属性关系列表
     public List<AttributeRelationComplexEvent> getAttributeList(String relationId) {
-        String type = "0";
-        return attributeRelationComplexEventRepository.findAllByComplexEventIdAndTypeNotOrderByType(relationId, type);
+        String type = "1";
+        return attributeRelationComplexEventRepository.findAllByComplexEventIdAndType(relationId, type);
     }
 
     //获取原子事件范围

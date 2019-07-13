@@ -27,7 +27,7 @@ public class AttributeRelationComplexEvent {
     private String type;
 
     /**
-     * 属性名称
+     * 属性名称，当type为0时，属性名称就是原子事件的单位（子站、子系统等）
      */
     @Column(name = "attribute_name")
     private String attributeName;
