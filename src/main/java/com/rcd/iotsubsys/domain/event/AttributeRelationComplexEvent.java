@@ -27,7 +27,9 @@ public class AttributeRelationComplexEvent {
     private String type;
 
     /**
-     * 属性名称，当type为0时，属性名称就是原子事件的单位（子站、子系统等）
+     * 属性名称
+     * 当type为0时，属性名称就是原子事件的单位（子站、子系统等）
+     * 当type为2时，为目标，暂时写死 00：失锁；01：自动重锁；02：重锁失败
      */
     @Column(name = "attribute_name")
     private String attributeName;
@@ -50,6 +52,12 @@ public class AttributeRelationComplexEvent {
      */
     @Column(name = "meta_event_id")
     private String metaEventId;
+    /**
+     * 与或非
+     * 只针对目标，1：与；2：或；3：非
+     */
+    @Column(name = "and_or_not")
+    private String andOrNot;
 
 
     public Long getId() {
@@ -106,5 +114,13 @@ public class AttributeRelationComplexEvent {
 
     public void setAttributeRelation(String attributeRelation) {
         this.attributeRelation = attributeRelation;
+    }
+
+    public String getAndOrNot() {
+        return andOrNot;
+    }
+
+    public void setAndOrNot(String andOrNot) {
+        this.andOrNot = andOrNot;
     }
 }

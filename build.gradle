@@ -241,6 +241,7 @@ dependencies {
     liquibaseRuntime "com.h2database:h2"
     compile group: 'com.ontotext.graphdb', name: 'graphdb-free-runtime', version: '8.9.0'
 
+    compile group: 'commons-httpclient', name: 'commons-httpclient', version: '3.1'
     //jhipster-needle-gradle-dependency - JHipster will add additional dependencies here
 }
 

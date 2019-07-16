@@ -107,6 +107,11 @@ public class ComplexEventListService {
         String type = "1";
         return attributeRelationComplexEventRepository.findAllByComplexEventIdAndType(relationId, type);
     }
+    //获取目标列表
+    public List<AttributeRelationComplexEvent> getTargetList(String relationId) {
+        String type = "2";
+        return attributeRelationComplexEventRepository.findAllByComplexEventIdAndType(relationId, type);
+    }
 
     //获取原子事件范围
     public List<Map<String, Object>> getMetaEventRange(String type) {

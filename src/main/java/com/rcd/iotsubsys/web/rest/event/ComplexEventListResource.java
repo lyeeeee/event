@@ -133,5 +133,32 @@ public class ComplexEventListResource {
         return ResponseEntity.ok(list);
     }
 
+    //获取目标列表
+    @GetMapping("/getTargetList")
+    @Timed
+    public ResponseEntity<List<AttributeRelationComplexEvent>> getTargetList(@RequestParam(required = false) String complexId) {
+        List<AttributeRelationComplexEvent> attributeList = complexEventListService.getTargetList(complexId);
+        if (attributeList == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(attributeList);
+    }
+    //新增属性关系
+    @PostMapping("/addTargetList")
+    @Timed
+    public ResponseEntity<AttributeRelationComplexEvent> addTargetList(@RequestBody AttributeRelationComplexEvent attributeRelationComplexEvent) {
+
+        AttributeRelationComplexEvent result = complexEventListService.addMeta(attributeRelationComplexEvent);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+    //删除属性关系
+    @DeleteMapping("/deleteTarget/{id}")
+    @Timed
+    public ResponseEntity<Void> deleteTarget(@PathVariable Long id) {
+//        logger.debug("REST request to delete student: {}", id);
+        complexEventListService.deleteMeta(id);
+        return ResponseEntity.ok().headers(HeaderUtil.createAlert("directory.deleted", id.toString())).build();
+    }
+
     
 }
