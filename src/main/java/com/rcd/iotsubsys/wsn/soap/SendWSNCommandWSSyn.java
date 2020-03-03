@@ -1,4 +1,4 @@
-package com.rcd.iotsubsys.wsn;
+package com.rcd.iotsubsys.wsn.soap;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -35,6 +35,7 @@ public class SendWSNCommandWSSyn {
 		try {
 			method.setRequestEntity(new StringRequestEntity(content, "text/xml", "utf-8"));
 		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
    		method.setRequestHeader("Content-type" , "text/xml");

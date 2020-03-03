@@ -3,8 +3,8 @@ package com.rcd.iotsubsys.service.event;
 import com.rcd.iotsubsys.domain.event.AttributeRelationEquipment;
 import com.rcd.iotsubsys.repository.event.AttributeRelationEquipmentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

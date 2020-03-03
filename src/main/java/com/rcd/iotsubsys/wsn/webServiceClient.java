@@ -12,17 +12,17 @@ import javax.annotation.PostConstruct;
  * @Date: 2019/6/27 18:53
  */
 
-@Component
+//@Component
 public class webServiceClient {
     static Logger logger = LoggerFactory.getLogger(webServiceClient.class);
 
     /**
      * @Postcontruct’在依赖注入完成后自动调用
      */
-    @PostConstruct
+//    @PostConstruct
     public static void start() {
         logger.info("启动wsn客户端，等待订阅消息");
         WSService service = new WSService();
-//        service.getInfoByWSN();
+       service.getInfoByWSN();
     }
 }

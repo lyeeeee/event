@@ -52,6 +52,7 @@ public class AttributeRelationComplexEvent {
      */
     @Column(name = "meta_event_id")
     private String metaEventId;
+
     /**
      * 与或非
      * 只针对目标，1：与；2：或；3：非
@@ -59,6 +60,11 @@ public class AttributeRelationComplexEvent {
     @Column(name = "and_or_not")
     private String andOrNot;
 
+    /**
+     * 原子事件的属性
+     */
+    @Column(name = "meta_attribute")
+    private String metaAttribute;
 
     public Long getId() {
         return id;
@@ -122,5 +128,13 @@ public class AttributeRelationComplexEvent {
 
     public void setAndOrNot(String andOrNot) {
         this.andOrNot = andOrNot;
+    }
+
+    public String getMetaAttribute() {
+        return metaAttribute;
+    }
+
+    public void setMetaAttribute(String metaAttribute) {
+        this.metaAttribute = metaAttribute;
     }
 }

@@ -7,10 +7,13 @@ import com.rcd.iotsubsys.repository.event.ComplexEventListRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -40,13 +43,13 @@ public class ComplexEventListService {
         Date ss = new Date();
         SimpleDateFormat format0 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String time = format0.format(ss.getTime());
-        if("subsites".equals(metaEvent.getMetaEventCompany())){
+        if ("subsites".equals(metaEvent.getMetaEventCompany())) {
             metaEvent.setMetaEventCompany("子站");
-        }else if("subsystem".equals(metaEvent.getMetaEventCompany())){
+        } else if ("subsystem".equals(metaEvent.getMetaEventCompany())) {
             metaEvent.setMetaEventCompany("子系统");
-        }else if("equipment".equals(metaEvent.getMetaEventCompany())){
+        } else if ("equipment".equals(metaEvent.getMetaEventCompany())) {
             metaEvent.setMetaEventCompany("设备");
-        }else if("attribute".equals(metaEvent.getMetaEventCompany())){
+        } else if ("attribute".equals(metaEvent.getMetaEventCompany())) {
             metaEvent.setMetaEventCompany("属性");
         }
 
@@ -107,6 +110,7 @@ public class ComplexEventListService {
         String type = "1";
         return attributeRelationComplexEventRepository.findAllByComplexEventIdAndType(relationId, type);
     }
+
     //获取目标列表
     public List<AttributeRelationComplexEvent> getTargetList(String relationId) {
         String type = "2";
@@ -115,14 +119,14 @@ public class ComplexEventListService {
 
     //获取原子事件范围
     public List<Map<String, Object>> getMetaEventRange(String type) {
-        if("subsites".equals(type)){
-            return  complexEventListRepository.findSubsites();
-        }else if ("subsystem".equals(type)){
-            return  complexEventListRepository.findSubsystem();
-        }else if ("equipment".equals(type)){
-            return  complexEventListRepository.findEquipment();
-        }else if ("attribute".equals(type)){
-            return  complexEventListRepository.findAttribute();
+        if ("subsites".equals(type)) {
+            return complexEventListRepository.findSubsites();
+        } else if ("subsystem".equals(type)) {
+            return complexEventListRepository.findSubsystem();
+        } else if ("equipment".equals(type)) {
+            return complexEventListRepository.findEquipment();
+        } else if ("attribute".equals(type)) {
+            return complexEventListRepository.findAttribute();
         }
         return new ArrayList<>();
     }

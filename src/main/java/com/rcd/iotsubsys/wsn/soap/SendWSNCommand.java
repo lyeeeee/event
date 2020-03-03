@@ -1,17 +1,14 @@
-package com.rcd.iotsubsys.wsn;
+package com.rcd.iotsubsys.wsn.soap;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,14 +16,13 @@ import java.util.Map;
  * 向wsn发送订阅消息
  */
 public class SendWSNCommand {
-    private static int counter = 0;
-    Logger logger = LoggerFactory.getLogger(SendWSNCommand.class);
     private String receiveAddr;
     private String wsnAddr;
     private String endpointAddr;
     private String localServiceAddr;
     private String subscriptionAddr;
     private HttpClient client;
+    private static int counter = 0;
 
     public SendWSNCommand(String receiveAddr, String wsnAddress) {
         localServiceAddr = receiveAddr;
@@ -36,20 +32,7 @@ public class SendWSNCommand {
     }
 
     /**
-     * 将<、>切换为xml格式
-     *
-     * @param string
-     * @return
-     */
-    public static String EscapeSequenceGenerate(String string) {
-        string = string.replaceAll("<", "&lt;");
-        string = string.replaceAll(">", "&gt;");
-        return string;
-    }
-
-    /**
      * 订阅操作，时延和丢包率采用默认值
-     *
      * @param id
      * @param topic
      * @return
@@ -73,8 +56,8 @@ public class SendWSNCommand {
         content += "<soapenv:Header/>";
         content += "<soapenv:Body>";
         content += "<org:WsnProcess>";
-        content += EscapeSequenceGenerate(
-            "<wsnt:Subscribe xmlns:wsnt=\"http://docs.oasis-open.org/wsnMgr/b-2\" xmlns:wsa=\"http://www.w3.org/2005/08/addressing\">");
+        content  +=  EscapeSequenceGenerate(
+                "<wsnt:Subscribe xmlns:wsnt=\"http://docs.oasis-open.org/wsnMgr/b-2\" xmlns:wsa=\"http://www.w3.org/2005/08/addressing\">");
         content += EscapeSequenceGenerate("<wsnt:ConsumerReference>");
         content += EscapeSequenceGenerate(" <wsa:Address>");
         content += EscapeSequenceGenerate("<id>" + id + "</id>");
@@ -95,23 +78,36 @@ public class SendWSNCommand {
         content += "</org:WsnProcess>";
         content += "</soapenv:Body>";
         content += "</soapenv:Envelope>";
-        String[] responseValue = send(wsnAddr + "/wsnprocess/", new HashMap<String, String>(), "utf-8", true, content.trim());
+        String[] responseValue = send(wsnAddr + "/wsnprocess/",new HashMap<String,String>(), "utf-8", true, content.trim());
 
-        if (responseValue[0].equals("200") && !responseValue[1].contains("failed")) {
-            returnValue = "ok";
+        if(responseValue[0].equals("200") && !responseValue[1].contains("failed")) {
+            returnValue="ok";
             SubscribeResponse response = new SubscribeResponse();
             String message = responseValue[1];
             int messageStart = message.indexOf("<ns2:Address>") + 13;
             int messageEnd = message.indexOf("</ns2:Address>");
-            if ((messageStart >= 0) && (messageEnd >= 0)) {
+            if( ( messageStart >= 0 ) && ( messageEnd >= 0 ) )
+            {
                 String address = message.substring(messageStart, messageEnd);
                 subscriptionAddr = address;
-                logger.info("******************************subscribe Address " + subscriptionAddr);
+                System.out.println("******************************subscribe Address " + subscriptionAddr);
             }
         } else {
-            returnValue = "error";
+            returnValue="error";
         }
         return returnValue;
+    }
+
+    /**
+     * 将<、>切换为xml格式
+     * 
+     * @param string
+     * @return
+     */
+    public static String EscapeSequenceGenerate(String string){
+        string = string.replaceAll("<", "&lt;");
+        string = string.replaceAll(">", "&gt;");
+        return string;
     }
 
     protected String[] send(String url, Map<String, String> params, String charset, boolean pretty, String content) {
@@ -119,13 +115,17 @@ public class SendWSNCommand {
 //        HttpClient client = new HttpClient();
         PostMethod method = new PostMethod(url);
         method.setQueryString("");
-        content = new String(content.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
-        //		method.setRequestBody(content);
-        //log.info("content:   " + content);
-        logger.info("content:   " + content);
+        try {
+            content = new String(content.getBytes("UTF-8"),"ISO-8859-1");
+        } catch (UnsupportedEncodingException e1) {
+            e1.printStackTrace();
+        }
+//		method.setRequestBody(content);
+        System.out.println("content:   "+content);
         try {
             method.setRequestEntity(new StringRequestEntity(content, "text/xml", "utf-8"));
         } catch (UnsupportedEncodingException e1) {
+            // TODO Auto-generated catch block
             e1.printStackTrace();
         }
         if (params != null) {
@@ -139,20 +139,20 @@ public class SendWSNCommand {
         try {
             int status = client.executeMethod(method);
             counter++;
-            logger.info("isresponsecounter:" + counter);
-            logger.info("----------5");
+            System.out.println("isresponsecounter:"+counter);
+            System.out.println("----------5");
             BufferedReader reader = new BufferedReader(new InputStreamReader(method.getResponseBodyAsStream(), charset));
             String line;
-            logger.info("----------1");
+            System.out.println("----------1");
             while ((line = reader.readLine()) != null) {
-                logger.info("----------2");
+                System.out.println("----------2");
                 if (pretty) {
                     response.append(line).append(System.getProperty("line.separator"));
-                } else {
+                } else{
                     response.append(line);
                 }
             }
-            logger.info("----------3");
+            System.out.println("----------3");
             reader.close();
             method.releaseConnection();
         } catch (IOException e) {
@@ -160,12 +160,12 @@ public class SendWSNCommand {
         } finally {
             method.releaseConnection();
         }
-        logger.info("----------4");
+        System.out.println("----------4");
         String res = response.toString();
         res = res.replaceAll("&lt;", "<");
         res = res.replaceAll("&gt;", ">");
         res = res.replaceAll("&quot;", "\"\"");
-        logger.info("response:  " + res);
-        return new String[]{String.valueOf(method.getStatusCode()), res};
+        System.out.println("response:  "+res);
+        return new String[] {String.valueOf(method.getStatusCode()),res};
     }
 }

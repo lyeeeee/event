@@ -1,31 +1,9 @@
 package com.rcd.iotsubsys.wsn;
-
 import com.rcd.iotsubsys.wsn.soap.SendWSNCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.ws.Endpoint;
-
-/**
- * @Author: HUHU
- * @Date: 2019/6/27 23:56
- * <p>
- * 发布与订阅主题
- */
-@Service
-@Transactional
-public class WSService {
-    private final Logger logger = LoggerFactory.getLogger(WSService.class);
-    private String addr;
-
-
-    // 获取订阅消息
-    @Async
-    public void getInfoByWSN() {
-        //本机地址
+public class TestWsnSDB {
+    public static void main(String[] args) {
         String wsnAddr = "http://192.168.99.121:9011/wsn-core";
         String receiveAddr = "http://192.168.99.121:9022/wsn-subscribe";
 
@@ -39,5 +17,4 @@ public class WSService {
         String id = "adminEvent";
         receive.subscribe(id, "event");
     }
-
 }

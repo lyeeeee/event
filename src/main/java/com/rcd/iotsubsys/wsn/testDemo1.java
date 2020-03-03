@@ -1,5 +1,7 @@
 package com.rcd.iotsubsys.wsn;
 
+import com.rcd.iotsubsys.wsn.soap.SendWSNCommand;
+
 import javax.xml.ws.Endpoint;
 
 /**

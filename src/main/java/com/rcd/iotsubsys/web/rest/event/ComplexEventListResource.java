@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 /**
  * 复杂事件列表
@@ -137,6 +138,7 @@ public class ComplexEventListResource {
     @GetMapping("/getTargetList")
     @Timed
     public ResponseEntity<List<AttributeRelationComplexEvent>> getTargetList(@RequestParam(required = false) String complexId) {
+        System.out.println("-----------------------"+complexId);
         List<AttributeRelationComplexEvent> attributeList = complexEventListService.getTargetList(complexId);
         if (attributeList == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

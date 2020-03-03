@@ -1,6 +1,8 @@
 package com.rcd.iotsubsys.wsn;
 
 
+import com.rcd.iotsubsys.wsn.soap.SendWSNCommandWSSyn;
+
 public class Trans {
     public static SendWSNCommandWSSyn register;
     public static SendWSNCommandWSSyn send;

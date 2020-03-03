@@ -1,4 +1,4 @@
-package com.rcd.iotsubsys.wsn;
+package com.rcd.iotsubsys.wsn.soap;
 
 import org.w3c.dom.Element;
 
