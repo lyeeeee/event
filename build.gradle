@@ -166,6 +166,14 @@ dependencies {
     // Use ", version: jhipster_dependencies_version, changing: true" if you want
     // to use a SNAPSHOT release instead of a stable release
     // https://mvnrepository.com/artifact/redis.clients/jedis
+    // https://mvnrepository.com/artifact/com.alibaba/fastjson
+    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.62'
+    // https://mvnrepository.com/artifact/org.apache.jena/jena-arq
+    compile group: 'org.apache.jena', name: 'jena-arq', version: '3.13.1'
+    // https://mvnrepository.com/artifact/org.apache.jena/jena-core
+    compile group: 'org.apache.jena', name: 'jena-core', version: '3.13.1'
+    // https://mvnrepository.com/artifact/org.apache.jena/jena-tdb
+    compile group: 'org.apache.jena', name: 'jena-tdb', version: '3.13.1'
     compile group: 'redis.clients', name: 'jedis', version: '3.1.0'
     compile group: "io.github.jhipster", name: "jhipster-framework"
     compile "io.dropwizard.metrics:metrics-core"
