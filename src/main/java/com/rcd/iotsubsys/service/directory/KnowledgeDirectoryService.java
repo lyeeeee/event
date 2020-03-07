@@ -1,16 +1,21 @@
 package com.rcd.iotsubsys.service.directory;
 
 import com.rcd.iotsubsys.domain.directory.DirectoryNode;
+import com.rcd.iotsubsys.dto.directory.DirectoryDTO;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.dto.response.base.ResponseCode;
+import com.rcd.iotsubsys.factory.DirectoryFactory;
 import com.rcd.iotsubsys.repository.directory.DirectoryRepository;
-import org.hibernate.criterion.Example;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @program: iot-knowledge-sub-system
@@ -21,8 +26,10 @@ import java.util.List;
 @Service
 public class KnowledgeDirectoryService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(KnowledgeDirectoryService.class);
     @Autowired
     DirectoryRepository directoryRepository;
+
     public JsonResult<Object> addOrUpdateDirectoryNode(DirectoryNode directoryNode) {
         DirectoryNode node = directoryRepository.save(directoryNode);
         if (node == null) {
@@ -54,5 +61,12 @@ public class KnowledgeDirectoryService {
             return new JsonResult<>(ResponseCode.DIRECTORY_NODE_NOT_EXIST);
         }
         return new JsonResult<>(node);
+    }
+
+    public JsonResult<Object> getAllDirectoryWithOwner(String owner) {
+        List<DirectoryNode> allNodes = directoryRepository.findAllByOwner(owner);
+        LOGGER.info("get all nodes, list size:{}", allNodes.size());
+        DirectoryDTO directoryDTO = DirectoryFactory.convertNodeList(allNodes);
+        return new JsonResult<>(directoryDTO);
     }
 }

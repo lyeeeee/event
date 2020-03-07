@@ -1,6 +1,7 @@
 package com.rcd.iotsubsys.web.rest.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.base.Equivalence;
 import com.rcd.iotsubsys.domain.directory.DirectoryNode;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.dto.response.base.ResponseCode;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -49,5 +51,14 @@ public class KnowledgeDirectoryController {
             return new JsonResult<>(ResponseCode.PARAM_ILLAGLE_OR_NULL);
         }
         return knowledgeDirectoryService.getDirectoryNodeWithID(nodeId);
+    }
+
+    @RequestMapping(value = "/getAllDirectory", method = RequestMethod.GET)
+    public JsonResult<Object> getAllDirectoryWithOwner(@RequestParam String owner) {
+        LOGGER.info("getAllDirectory with owner:{}",owner);
+        if (StringUtils.isEmpty(owner)) {
+            return new JsonResult<>(ResponseCode.DIRECTORY_WITHOUT_OWNER);
+        }
+        return knowledgeDirectoryService.getAllDirectoryWithOwner(owner);
     }
 }

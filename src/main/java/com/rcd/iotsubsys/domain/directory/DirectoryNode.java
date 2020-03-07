@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @create: 2020-03-04 16:53
  */
 @Entity
-@Table(name = "directory_node")
+@Table(name = "knowledge_directory_node")
 public class DirectoryNode implements Serializable {
 
     private static final long serialVersionUID = 1L;

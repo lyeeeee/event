@@ -15,7 +15,8 @@ public enum ResponseCode {
     IOT_DIRECTORY_SAVE_OR_UPDATE_ERROR(1, "增加或更新目录结点信息失败"),
     PARAM_ILLAGLE_OR_NULL(2, "缺少参数或参数异常"),
     DIRECTORY_NODE_HAS_CHILD(3, "目录结点有子节点，禁止删除"),
-    DIRECTORY_NODE_NOT_EXIST(4, "目录节点不存在");
+    DIRECTORY_NODE_NOT_EXIST(4, "目录节点不存在"),
+    DIRECTORY_WITHOUT_OWNER(5, "缺少owner参数， 无效的查询");
     ResponseCode(int code, String msg) {
         this.code = code;
         this.msg = msg;

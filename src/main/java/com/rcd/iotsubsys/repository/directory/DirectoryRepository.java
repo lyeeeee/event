@@ -19,4 +19,6 @@ public interface DirectoryRepository extends JpaRepository<DirectoryNode, Long> 
 //    @Query("select *  from DirectoryManagement where parent_id = ?1 ")
 //    List<DirectoryNode> getNodeByParentId(Long parentId);
      List<DirectoryNode> findAllByParentId(Long parentId);
+
+     List<DirectoryNode> findAllByOwner(String owner);
 }
