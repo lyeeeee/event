@@ -28,7 +28,7 @@ public class GraphDBCommon {
     public static void insertGraphDB(String graphName,File file) {
         Repository repository = new HTTPRepository(GRAPHDB_SERVER, REPOSITORY_ID);
         repository.initialize();
-//        File file = new File("C:\\Users\\hyf_0\\Desktop\\owl\\aaa.owl");
+//        File file = new File("C:\\Users\\hyf_0\\Desktop\\OwlService\\aaa.OwlService");
 //        String baseURI = "http://IOTKnowledge/test";
         String baseURI = graphName;
         ValueFactory f = repository.getValueFactory();

@@ -20,7 +20,7 @@ public class HandleOwlUtil {
 
 
     //1、根据NAMED_INDIVIDUAL查出符合条件的
-    public final static String NAMED_INDIVIDUAL = "<http://www.w3.org/2002/07/owl#NamedIndividual>";
+    public final static String NAMED_INDIVIDUAL = "<http://www.w3.org/2002/07/OwlService#NamedIndividual>";
     public final static String LOCATE = "<http://www.w3.org/ns/sosa/locate>";
     public final static String TYPE = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
     public final static String SUB_CLASS_OF = "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";

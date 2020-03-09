@@ -1,7 +1,6 @@
-package com.rcd.iotsubsys.web.rest.controller;
+package com.rcd.iotsubsys.web.rest.knowledge;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.common.base.Equivalence;
 import com.rcd.iotsubsys.domain.directory.DirectoryNode;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.dto.response.base.ResponseCode;
@@ -61,4 +60,13 @@ public class KnowledgeDirectoryController {
         }
         return knowledgeDirectoryService.getAllDirectoryWithOwner(owner);
     }
+
+//    @RequestMapping(value = "/getChild", method = RequestMethod.GET)
+//    public JsonResult<Object> getAllDirectoryWithOwner(@RequestParam String owner) {
+//        LOGGER.info("getAllDirectory with owner:{}",owner);
+//        if (StringUtils.isEmpty(owner)) {
+//            return new JsonResult<>(ResponseCode.DIRECTORY_WITHOUT_OWNER);
+//        }
+//        return knowledgeDirectoryService.getAllDirectoryWithOwner(owner);
+//    }
 }

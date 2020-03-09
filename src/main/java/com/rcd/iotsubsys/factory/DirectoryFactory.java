@@ -29,12 +29,12 @@ public class DirectoryFactory {
             }
             child.add(node);
         });
-        if (!nodes.containsKey(0L)) {
+        if (!nodes.containsKey(-1L)) {
             LOGGER.error("不存在根节点");
             return new DirectoryDTO();
         }
-        // 父节点为0的结点为根
-        DirectoryNode cur = nodes.get(0L).get(0);
+        // 父节点为-1的结点为根
+        DirectoryNode cur = nodes.get(-1L).get(0);
         DirectoryDTO directoryDTO = new DirectoryDTO();
         // 设置根节点为root
         directoryDTO.setCur(cur);
