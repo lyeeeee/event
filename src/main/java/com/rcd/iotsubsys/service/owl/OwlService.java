@@ -2,6 +2,8 @@ package com.rcd.iotsubsys.service.owl;
 
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+
 /**
  * @program: iot-knowledge-sub-system
  * @description: ${description}
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OwlService {
 
-    public void parseOwl() {
+    public void parseOwl(File file) {
         
     }
 }
