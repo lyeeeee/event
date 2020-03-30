@@ -53,13 +53,13 @@ public class Main {
 
         // we have a local copy of the wine ontology
         m.getDocumentManager().addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/wine",
-                                            "file:testing/reasoners/bugs/wine.owl" );
+                                            "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/wine.owl" );
         m.getDocumentManager().addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/wine.owl",
-                                            "file:testing/reasoners/bugs/wine.owl" );
+                                            "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/wine.owl" );
         m.getDocumentManager().addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/food",
-                                            "file:testing/reasoners/bugs/food.owl" );
+                                            "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/food.owl" );
         m.getDocumentManager().addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/food.owl",
-                                            "file:testing/reasoners/bugs/food.owl" );
+                                            "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/food.owl" );
 
         m.read( "http://www.w3.org/2001/sw/WebOnt/guide-src/wine" );
 

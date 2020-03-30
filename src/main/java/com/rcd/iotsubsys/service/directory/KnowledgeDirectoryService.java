@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -63,8 +64,11 @@ public class KnowledgeDirectoryService {
         return new JsonResult<>(node);
     }
 
-    public JsonResult<Object> getAllDirectoryWithOwner(String owner) {
-        List<DirectoryNode> allNodes = directoryRepository.findAllByOwner(owner);
+    public JsonResult<Object> getAllDirectoryWithOwner(List<String> owner) {
+        List<DirectoryNode> allNodes = new ArrayList<>();
+        for (String s : owner) {
+            allNodes.addAll(directoryRepository.findAllByOwner(s));
+        }
         LOGGER.info("get all nodes, list size:{}", allNodes.size());
         DirectoryDTO directoryDTO = DirectoryFactory.convertNodeList(allNodes);
         return new JsonResult<>(directoryDTO);

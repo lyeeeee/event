@@ -26,11 +26,11 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.serializer.SerializationContext;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.util.FileManager;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+//import org.apache.poi.ss.usermodel.Cell;
+//import org.apache.poi.ss.usermodel.Row;
+//import org.apache.poi.ss.usermodel.Sheet;
+//import org.apache.poi.ss.usermodel.Workbook;
+//import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,8 +46,8 @@ public class ExampleARQ_06 {
 		QueryExecution qexec = QueryExecutionFactory.create(query, model);
 
 		FileOutputStream out = new FileOutputStream("target/sxssf.xlsx");
-		Workbook wb = new SXSSFWorkbook(100);
-		Sheet sh = wb.createSheet();
+//		Workbook wb = new SXSSFWorkbook(100);
+//		Sheet sh = wb.createSheet();
 
 		int rows = 0;
 		int columns = 0;
@@ -57,33 +57,33 @@ public class ExampleARQ_06 {
 			List<Var> vars = new ArrayList<Var>(varNames.size());
 
 			// first row with var names
-			Row row = sh.createRow(rows++);
-			for (String varName : varNames) {
-				Var var = Var.alloc(varName);
-				Cell cell = row.createCell(columns++);
-				cell.setCellValue(var.toString());
-				vars.add(var);
-			}
+//			Row row = sh.createRow(rows++);
+//			for (String varName : varNames) {
+//				Var var = Var.alloc(varName);
+//				Cell cell = row.createCell(columns++);
+//				cell.setCellValue(var.toString());
+//				vars.add(var);
+//			}
 
 			// other rows with bindings
 			while (resultSet.hasNext()) {
 				Binding bindings = resultSet.nextBinding();
-				row = sh.createRow(rows++);
-				columns = 0;
-				for (Var var : vars) {
-					Node n = bindings.get(var);
-					if (n != null) {
-						Cell cell = row.createCell(columns++);
-						String value = FmtUtils.stringForNode(n, (SerializationContext) null);
-						cell.setCellValue(value);
-					}
-				}
+//				row = sh.createRow(rows++);
+//				columns = 0;
+//				for (Var var : vars) {
+//					Node n = bindings.get(var);
+//					if (n != null) {
+//						Cell cell = row.createCell(columns++);
+//						String value = FmtUtils.stringForNode(n, (SerializationContext) null);
+//						cell.setCellValue(value);
+//					}
+//				}
 			}
 		} finally {
 			qexec.close();
 		}
 
-		wb.write(out);
+//		wb.write(out);
 		out.close();
 	}
 

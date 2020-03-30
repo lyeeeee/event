@@ -12,6 +12,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @program: iot-knowledge-sub-system
  * @description: ${description}
@@ -53,20 +55,11 @@ public class KnowledgeDirectoryController {
     }
 
     @RequestMapping(value = "/getAllDirectory", method = RequestMethod.GET)
-    public JsonResult<Object> getAllDirectoryWithOwner(@RequestParam String owner) {
-        LOGGER.info("getAllDirectory with owner:{}",owner);
+    public JsonResult<Object> getAllDirectoryWithOwner(@RequestParam List<String> owner) {
+        LOGGER.info("getAllDirectory with owner, size :{}",owner.size());
         if (StringUtils.isEmpty(owner)) {
             return new JsonResult<>(ResponseCode.DIRECTORY_WITHOUT_OWNER);
         }
         return knowledgeDirectoryService.getAllDirectoryWithOwner(owner);
     }
-
-//    @RequestMapping(value = "/getChild", method = RequestMethod.GET)
-//    public JsonResult<Object> getAllDirectoryWithOwner(@RequestParam String owner) {
-//        LOGGER.info("getAllDirectory with owner:{}",owner);
-//        if (StringUtils.isEmpty(owner)) {
-//            return new JsonResult<>(ResponseCode.DIRECTORY_WITHOUT_OWNER);
-//        }
-//        return knowledgeDirectoryService.getAllDirectoryWithOwner(owner);
-//    }
 }

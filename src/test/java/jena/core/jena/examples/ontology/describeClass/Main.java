@@ -83,16 +83,17 @@ public class Main {
 
     /**
      * Add alternate paths to save downloading the default ontologies from the Web
+     * D:\Users\liyi\Desktop\1\实验室\光纤授时\event\IOTKnowledge-server\src\test\resources\testing\reasoners\bugs\loop.owl
      */
     protected static void addFoodWineAltPaths( OntDocumentManager odm ) {
         odm.addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/wine",
-                         "file:testing/reasoners/bugs/wine.owl" );
+                         "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/wine.owl" );
         odm.addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/wine.owl",
-                         "file:testing/reasoners/bugs/wine.owl" );
+                         "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/wine.owl" );
         odm.addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/food",
-                         "file:testing/reasoners/bugs/food.owl" );
+                         "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/food.owl" );
         odm.addAltEntry( "http://www.w3.org/2001/sw/WebOnt/guide-src/food.owl",
-                         "file:testing/reasoners/bugs/food.owl" );
+                         "file:D:\\Users\\liyi\\Desktop\\1\\实验室\\光纤授时\\event\\IOTKnowledge-server\\src\\test\\resources\\testing/reasoners/bugs/food.owl" );
     }
 
     //==============================================================================

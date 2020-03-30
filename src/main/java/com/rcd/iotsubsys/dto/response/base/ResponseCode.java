@@ -16,7 +16,12 @@ public enum ResponseCode {
     PARAM_ILLAGLE_OR_NULL(2, "缺少参数或参数异常"),
     DIRECTORY_NODE_HAS_CHILD(3, "目录结点有子节点，禁止删除"),
     DIRECTORY_NODE_NOT_EXIST(4, "目录节点不存在"),
-    DIRECTORY_WITHOUT_OWNER(5, "缺少owner参数， 无效的查询");
+    DIRECTORY_WITHOUT_OWNER(5, "缺少owner参数， 无效的查询"),
+    KNOWLEDGE_MODEL_NAME_EMPTY(6, "知识模型名称为空"),
+    KNOWLEDGE_MODEL_DUPLIC(7,"当前知识文件已经存在"),
+
+    EVENT_METAEVENT_EXIST(8, "当前原子事件已经存在");
+
     ResponseCode(int code, String msg) {
         this.code = code;
         this.msg = msg;

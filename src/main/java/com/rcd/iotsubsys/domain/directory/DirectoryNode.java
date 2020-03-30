@@ -1,5 +1,7 @@
 package com.rcd.iotsubsys.domain.directory;
 
+import org.hibernate.annotations.Proxy;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -11,6 +13,7 @@ import java.io.Serializable;
  */
 @Entity
 @Table(name = "knowledge_directory_node")
+@Proxy(lazy = false)
 public class DirectoryNode implements Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -166,15 +166,15 @@ dependencies {
     // Use ", version: jhipster_dependencies_version, changing: true" if you want
     // to use a SNAPSHOT release instead of a stable release
     // https://mvnrepository.com/artifact/org.jruby/jruby-core
-    compile group: 'org.jruby', name: 'jruby-core', version: '1.6.5'
+    //compile group: 'org.jruby', name: 'jruby-core', version: '1.6.5'
     // https://mvnrepository.com/artifact/net.rootdev/java-rdfa
-    compile group: 'net.rootdev', name: 'java-rdfa', version: '0.4.2'
+    //compile group: 'net.rootdev', name: 'java-rdfa', version: '0.4.2'
     // https://mvnrepository.com/artifact/org.apache.jena/jena-text
-    compile group: 'org.apache.jena', name: 'jena-text', version: '3.13.1'
+    //compile group: 'org.apache.jena', name: 'jena-text', version: '3.13.1'
     // https://mvnrepository.com/artifact/org.apache.jena/apache-jena-libs
-    compile group: 'org.apache.jena', name: 'apache-jena-libs', version: '3.13.1', ext: 'pom'
+    //compile group: 'org.apache.jena', name: 'apache-jena-libs', version: '3.13.1', ext: 'pom'
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.13'
+    //compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.13'
     // https://mvnrepository.com/artifact/redis.clients/jedis
     // https://mvnrepository.com/artifact/com.alibaba/fastjson
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.62'
