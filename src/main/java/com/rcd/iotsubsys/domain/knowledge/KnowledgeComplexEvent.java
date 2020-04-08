@@ -8,12 +8,12 @@ import javax.persistence.*;
  * @program: iot-knowledge-sub-system
  * @description: ${description}
  * @author: liyi
- * @create: 2020-03-24 17:52
+ * @create: 2020-04-04 18:18
  */
 @Entity
-@Table(name = "knowledge_meta_event")
+@Table(name = "knowledge_complex_event")
 @Proxy(lazy = false)
-public class KnowledgeMetaEvent {
+public class KnowledgeComplexEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -25,34 +25,44 @@ public class KnowledgeMetaEvent {
     private Long id;
 
     /***
-     * 原子事件名称
+     * 复杂事件名称
      */
     @Column(name = "name", nullable = false)
     private String name;
 
     /***
-     * 原子事件描述
+     * 复杂事件描述
      */
     @Column(name = "synopsis", nullable = false)
     private String synopsis;
 
-    /***
-     * topic
-     */
-    @Column(name = "topic", nullable = false)
-    private String topic;
+    public String getRelation() {
+        return relation;
+    }
+
+    public void setRelation(String relation) {
+        this.relation = relation;
+    }
 
     /***
-     * 知识id
+     * 原子事关系
      */
-    @Column(name = "knowledge_id", nullable = false)
-    private Long knowledgeId;
+    @Column(name = "relation", nullable = false)
+    private String relation;
 
     /***
-     * 知识名称
+     * 目标关系
      */
-    @Column(name = "knowledge", nullable = false)
-    private String knowledge;
+    @Column(name = "target_relation", nullable = false)
+    private String targetRelation;
+
+    public String getTargetRelation() {
+        return targetRelation;
+    }
+
+    public void setTargetRelation(String targetRelation) {
+        this.targetRelation = targetRelation;
+    }
 
     public Long getId() {
         return id;
@@ -76,29 +86,5 @@ public class KnowledgeMetaEvent {
 
     public void setSynopsis(String synopsis) {
         this.synopsis = synopsis;
-    }
-
-    public String getTopic() {
-        return topic;
-    }
-
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public Long getKnowledgeId() {
-        return knowledgeId;
-    }
-
-    public void setKnowledgeId(Long knowledgeId) {
-        this.knowledgeId = knowledgeId;
-    }
-
-    public String getKnowledge() {
-        return knowledge;
-    }
-
-    public void setKnowledge(String knowledge) {
-        this.knowledge = knowledge;
     }
 }

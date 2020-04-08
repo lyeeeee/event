@@ -20,7 +20,8 @@ public enum ResponseCode {
     KNOWLEDGE_MODEL_NAME_EMPTY(6, "知识模型名称为空"),
     KNOWLEDGE_MODEL_DUPLIC(7,"当前知识文件已经存在"),
 
-    EVENT_METAEVENT_EXIST(8, "当前原子事件已经存在");
+    EVENT_METAEVENT_EXIST(8, "当前原子事件已经存在"),
+    EVENT_COMPLEXEVENT_EXIST(9, "当前复杂事件已经存在");
 
     ResponseCode(int code, String msg) {
         this.code = code;
