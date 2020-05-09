@@ -3,6 +3,8 @@ package com.rcd.iotsubsys.repository.event;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeMetaEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * @program: iot-knowledge-sub-system
  * @description: ${description}
@@ -14,4 +16,6 @@ public interface MetaEventRepository extends JpaRepository<KnowledgeMetaEvent, L
     KnowledgeMetaEvent findByName(String name);
 
     KnowledgeMetaEvent findAllByName(String name);
+
+    List<KnowledgeMetaEvent> findAllByIdIn(List<Long> ids);
 }

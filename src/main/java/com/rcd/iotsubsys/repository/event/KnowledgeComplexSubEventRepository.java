@@ -14,4 +14,6 @@ import java.util.List;
 public interface KnowledgeComplexSubEventRepository extends JpaRepository<KnowledgeComplexSubEvnet, Long> {
 
     List<KnowledgeComplexSubEvnet> getAllByComplexEventId(Long id);
+
+    void deleteAllByComplexEventId(Long id);
 }

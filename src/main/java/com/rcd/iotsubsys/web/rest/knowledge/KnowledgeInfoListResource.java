@@ -21,8 +21,8 @@ import java.util.Map;
 /**
  * 知识列表
  */
-@RestController
-@RequestMapping("/api/knowledge/infoList")
+//@RestController
+//@RequestMapping("/api/knowledge/infoList")
 public class KnowledgeInfoListResource {
 
     private static String graphName = "";

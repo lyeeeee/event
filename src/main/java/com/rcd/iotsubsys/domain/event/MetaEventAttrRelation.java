@@ -54,6 +54,34 @@ public class MetaEventAttrRelation {
     @Column(name = "topic_attribute_type", nullable = false)
     private String topicAttributeType;
 
+    /***
+     * 设备名称
+     */
+    @Column(name = "device_name", nullable = false)
+    private String deviceName;
+
+    /***
+     * 数据名称
+     */
+    @Column(name = "data_name", nullable = false)
+    private String dataName;
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public String getDataName() {
+        return dataName;
+    }
+
+    public void setDataName(String dataName) {
+        this.dataName = dataName;
+    }
+
     public Long getId() {
         return id;
     }

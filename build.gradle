@@ -175,7 +175,12 @@ dependencies {
     //compile group: 'org.apache.jena', name: 'apache-jena-libs', version: '3.13.1', ext: 'pom'
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
     //compile group: 'org.apache.poi', name: 'poi-ooxml', version: '3.13'
+    // https://mvnrepository.com/artifact/org.projectlombok/lombok
+    providedCompile group: 'org.projectlombok', name: 'lombok', version: '1.14.0'
     // https://mvnrepository.com/artifact/redis.clients/jedis
+    compile("org.springframework.boot:spring-boot-devtools")
+    // https://mvnrepository.com/artifact/cglib/cglib
+    compile group: 'cglib', name: 'cglib', version: '3.2.5'
     // https://mvnrepository.com/artifact/com.alibaba/fastjson
     compile group: 'com.alibaba', name: 'fastjson', version: '1.2.62'
     // https://mvnrepository.com/artifact/org.apache.jena/jena-arq
@@ -184,6 +189,8 @@ dependencies {
     compile group: 'org.apache.jena', name: 'jena-core', version: '3.13.1'
     // https://mvnrepository.com/artifact/org.apache.jena/jena-tdb
     compile group: 'org.apache.jena', name: 'jena-tdb', version: '3.13.1'
+    // https://mvnrepository.com/artifact/org.sosy-lab/javasmt-solver-z3
+    compile group: 'org.sosy-lab', name: 'javasmt-solver-z3', version: 'z3-4.4.1-1558-gf96cfea'
     compile group: 'redis.clients', name: 'jedis', version: '3.1.0'
     compile group: "io.github.jhipster", name: "jhipster-framework"
     compile "io.dropwizard.metrics:metrics-core"

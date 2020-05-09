@@ -56,6 +56,34 @@ public class KnowledgeComplexEvent {
     @Column(name = "target_relation", nullable = false)
     private String targetRelation;
 
+    /***
+     * 原子事id关系
+     */
+    @Column(name = "id_relation", nullable = false)
+    private String idRelation;
+
+    /***
+     * 目标id关系
+     */
+    @Column(name = "id_target_relation", nullable = false)
+    private String idTargetRelation;
+
+    public String getIdRelation() {
+        return idRelation;
+    }
+
+    public void setIdRelation(String idRelation) {
+        this.idRelation = idRelation;
+    }
+
+    public String getIdTargetRelation() {
+        return idTargetRelation;
+    }
+
+    public void setIdTargetRelation(String idTargetRelation) {
+        this.idTargetRelation = idTargetRelation;
+    }
+
     public String getTargetRelation() {
         return targetRelation;
     }

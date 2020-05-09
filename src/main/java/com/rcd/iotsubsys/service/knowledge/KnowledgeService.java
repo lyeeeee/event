@@ -1,23 +1,25 @@
 package com.rcd.iotsubsys.service.knowledge;
 
+import com.rcd.iotsubsys.domain.directory.DirectoryNode;
+import com.rcd.iotsubsys.domain.knowledge.KnowledgeDetail;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeFile;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeKnowledge;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeMetaEvent;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.dto.response.base.ResponseCode;
 import com.rcd.iotsubsys.factory.KnowledgeFileFactory;
+import com.rcd.iotsubsys.repository.directory.DirectoryRepository;
 import com.rcd.iotsubsys.repository.event.MetaEventRepository;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeFileRepository;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.ontology.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +42,9 @@ public class KnowledgeService {
 
     @Autowired
     private MetaEventRepository metaEventRepository;
+
+    @Autowired
+    private DirectoryRepository directoryRepository;
 
     public JsonResult<Object> checkUploadKnowledge(Map<String, Object> map) throws IOException {
         String name = (String) map.get("name");
@@ -71,5 +76,62 @@ public class KnowledgeService {
         KnowledgeFile file = knowledgeFileRepository.getOne(fileId);
         List<String> knowledgeProperties = ontologyService.getKnowledgeProperties(file.getFileName(),file.getModelName(), knowledge.getKnowledgeUri());
         return new JsonResult<>(knowledgeProperties);
+    }
+
+    public JsonResult<Object> getKnowledge(String knowledgeName, Long field, Long department, Long metaDir) {
+        List<KnowledgeDetail> ret = new ArrayList<>();
+        List<KnowledgeKnowledge> knowledges = knowledgeRepository.findAll();
+        System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+        if (!ObjectUtils.isEmpty(metaDir)) {
+            knowledges = knowledges.stream()
+                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(metaDir))
+                .collect(Collectors.toList());
+            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+        } else if (!ObjectUtils.isEmpty(department))  {
+            knowledges = knowledges.stream()
+                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(department))
+                .collect(Collectors.toList());
+            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+        } else if (!ObjectUtils.isEmpty(field))  {
+            knowledges = knowledges.stream()
+                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(field))
+                .collect(Collectors.toList());
+            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+        }
+        if (!ObjectUtils.isEmpty(knowledgeName)) {
+//            List<KnowledgeKnowledge> tmp = new ArrayList<>();
+//            for (KnowledgeKnowledge k : knowledges) {
+//                System.out.println(k.getKnowledgeName());
+//                if (k.getKnowledgeName().contains(knowledgeName)) {
+//                    tmp.add(k);
+//                }
+//            }
+//            knowledges = tmp;
+            knowledges = knowledges.stream()
+                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeName().contains(knowledgeName))
+                .collect(Collectors.toList());
+            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+        }
+        knowledges.forEach( elem -> {
+            Long cur = elem.getKnowledgeDir();
+            List<DirectoryNode> pre = new ArrayList<>();
+            while (cur != -1) {
+                DirectoryNode node = directoryRepository.getOne(cur);
+                pre.add(node);
+                cur = node.getParentId();
+            }
+            KnowledgeDetail detail = new KnowledgeDetail();
+            detail.setKnowledgeName(elem.getKnowledgeName());
+            detail.setKnowledgeId(elem.getId());
+            detail.setField(pre.get(pre.size()-2).getValue());
+            detail.setFieldId(pre.get(pre.size()-2).getId());
+            detail.setDepartment(pre.get(pre.size()-3).getValue());
+            detail.setDepartmentId(pre.get(pre.size()-3).getId());
+            detail.setMetaDir(pre.get(0).getValue());
+            detail.setMetaDirId(pre.get(0).getId());
+            detail.setKnowledgeSynopsis(null);
+            ret.add(detail);
+        });
+        return new JsonResult<>(ret);
     }
 }

@@ -15,8 +15,8 @@ import javax.xml.ws.Endpoint;
  * <p>
  * 发布与订阅主题
  */
-@Service
-@Transactional
+//@Service
+//@Transactional
 public class WSService {
     private final Logger logger = LoggerFactory.getLogger(WSService.class);
     private String addr;

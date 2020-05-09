@@ -60,6 +60,15 @@ public class KnowledgeController {
         return new JsonResult<>();
     }
 
+    @RequestMapping(value = "/getAllKnowledge", method = RequestMethod.GET)
+    public JsonResult<Object> getAllKnowledge(@RequestParam(name = "knowledgeName" , required = false) String knowledgeName,
+                                           @RequestParam(name = "field" , required = false) Long field,
+                                           @RequestParam(name = "department" , required = false) Long department,
+                                           @RequestParam(name = "metaDir" , required = false) Long metaDir) throws IOException {
+        LOGGER.info("getAllKnowledge with knowledgeName:{},field:{},department:{},metaDir:{}", knowledgeName,field,department,metaDir);
+        return knowledgeService.getKnowledge(knowledgeName, field, department, metaDir);
+    }
+
     @RequestMapping(value = "/getKnowledgeProperty", method = RequestMethod.GET)
     public JsonResult<Object> add(@RequestParam(required = false) Long metaEventId) throws IOException {
         LOGGER.info("getKnowledgeProperty with knowledgeId:{}", metaEventId);

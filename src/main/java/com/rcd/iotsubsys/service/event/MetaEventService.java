@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -66,7 +67,7 @@ public class MetaEventService {
     }
 
     public JsonResult<Object> addMetaEventRelation(MetaEventAttrRelation metaEventAttrRelation) {
-        metaEventAttrRelation.setKnowledgeAttributeType("string");
+        metaEventAttrRelation.setKnowledgeAttributeType(metaEventAttrRelation.getTopicAttributeType());
         MetaEventAttrRelation save = metaEventAttrRelationRepository.save(metaEventAttrRelation);
         return new JsonResult<>(save);
     }
@@ -79,13 +80,27 @@ public class MetaEventService {
         return new JsonResult<>(list);
     }
 
+    public JsonResult<Object> getAllRelationByIds(List<Long> metaEventIds) {
+        List<MetaEventAttrRelation> list = metaEventAttrRelationRepository.findAllByMetaEventIdIn(metaEventIds);
+        if (CollectionUtils.isEmpty(list)) {
+            return new JsonResult<>(new ArrayList<>());
+        }
+        return new JsonResult<>(list);
+    }
+
     public JsonResult<Object> deleteRelation(Long relationId) {
         metaEventAttrRelationRepository.deleteById(relationId);
         return new JsonResult<>();
     }
 
+    @Transactional
     public JsonResult<Object> deleteMetaEvent(Long metaEventId) {
         metaEventRepository.deleteById(metaEventId);
+        metaEventAttrRelationRepository.deleteAllByMetaEventId(metaEventId);
         return new JsonResult<>();
+    }
+
+    public JsonResult<Object> getMetaEventByIds(List<Long> ids) {
+        return new JsonResult<>(metaEventRepository.findAllByIdIn(ids));
     }
 }

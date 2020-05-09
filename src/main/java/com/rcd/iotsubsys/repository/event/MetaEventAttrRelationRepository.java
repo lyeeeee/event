@@ -16,4 +16,7 @@ public interface MetaEventAttrRelationRepository extends JpaRepository<MetaEvent
 
     List<MetaEventAttrRelation> findAllByMetaEventId(Long metaEventId);
 
+    List<MetaEventAttrRelation> findAllByMetaEventIdIn(List<Long> metaEventIds);
+
+    void deleteAllByMetaEventId(Long metaEventId);
 }

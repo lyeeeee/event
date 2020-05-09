@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @program: iot-knowledge-sub-system
  * @description: ${description}
@@ -37,6 +40,13 @@ public class MetaEventController {
         LOGGER.info("get all metaevent");
         return metaEventService.getAllMetaEvent(name);
     }
+
+    @RequestMapping(value = "/getAllByIds", method = RequestMethod.GET)
+    public JsonResult<Object> getAllByIds(@RequestParam(required = false) List<Long> ids) throws IOException {
+        LOGGER.info("get all metaevent by ids:{}", JSONObject.toJSONString(ids));
+        return metaEventService.getMetaEventByIds(ids);
+    }
+
 
     @RequestMapping(value = "/getRelation", method = RequestMethod.GET)
     public JsonResult<Object> getRelationMap(@RequestParam(required = false) Long relationId) throws IOException {

@@ -47,7 +47,7 @@ public class ComplexEventController {
     }
 
     @RequestMapping(value = "/getAllSubEvent", method = RequestMethod.GET)
-    public JsonResult<Object> add(@RequestParam Long complexEventId) throws IOException {
+    public JsonResult<Object> getAllSubEvent(@RequestParam Long complexEventId) throws IOException {
         LOGGER.info("getAllSubEvent with param:{}", complexEventId);
         return complexEventService.getAllSubEvent(complexEventId);
     }
@@ -64,11 +64,14 @@ public class ComplexEventController {
         return complexEventService.deleteComplexSubEvent(complexSubEventId);
     }
 
+    /**
+     * 新增原子事件关系
+     * */
     @RequestMapping(value = "/addMetaEventRelation", method = RequestMethod.GET)
-    public JsonResult<Object> addMetaEventRelation(@RequestParam Long complexEventId,
-                                                   @RequestParam String relation) throws IOException {
-        LOGGER.info("addMetaEventRelation with complexEventId:{}, relation:{}", complexEventId, relation);
-        return complexEventService.addMetaEventRelation(complexEventId, relation);
+    public JsonResult<Object> addMetaEventRelation(@RequestParam Long left, @RequestParam Long right,
+                                                   @RequestParam Integer lr, @RequestParam Long complexId) throws IOException {
+        LOGGER.info("addMetaEventRelation with left:{}, right:{}, lr:{}, complexId:{}", left, right,lr, complexId);
+        return complexEventService.addMetaEventRelation(left, right,lr,complexId);
     }
 
     @RequestMapping(value = "/addTarget", method = RequestMethod.POST)
@@ -84,9 +87,44 @@ public class ComplexEventController {
     }
 
     @RequestMapping(value = "/addTargetRelation", method = RequestMethod.GET)
-    public JsonResult<Object> addTargetRelation(@RequestParam Long complexEventId,
-                                                   @RequestParam String relation) throws IOException {
-        LOGGER.info("addTargetRelation with complexEventId:{}, relation:{}", complexEventId, relation);
-        return complexEventService.addTargetRelation(complexEventId, relation);
+    public JsonResult<Object> addTargetRelation(@RequestParam Long left, @RequestParam Long right,
+                                                @RequestParam Integer lr, @RequestParam Long complexId) throws IOException {
+        LOGGER.info("addTargetRelation with left:{}, right:{}, lr:{}, complexId:{}", left, right,lr, complexId);
+        return complexEventService.addTargetRelation(left, right,lr, complexId);
+    }
+
+    @RequestMapping(value = "/getAllSubEventRelation", method = RequestMethod.GET)
+    public JsonResult<Object> getAllSubEventRelation(@RequestParam Long complexEventId) throws IOException {
+        LOGGER.info("getAllSubEventRelation with param:{}", complexEventId);
+        return complexEventService.getAllSubEventRelation(complexEventId);
+    }
+    @RequestMapping(value = "/getAllTargetRelation", method = RequestMethod.GET)
+    public JsonResult<Object> getAllTargetRelation(@RequestParam Long complexEventId) throws IOException {
+        LOGGER.info("getAllTargetRelation with param:{}", complexEventId);
+        return complexEventService.getAllTargetRelation(complexEventId);
+    }
+
+    @RequestMapping(value = "/deleteTarget", method = RequestMethod.DELETE)
+    public JsonResult<Object> deleteTarget(@RequestParam Long complexTargetId) throws IOException {
+        LOGGER.info("deleteTarget with param:{}", complexTargetId);
+        return complexEventService.deleteComplexTarget(complexTargetId);
+    }
+
+    @RequestMapping(value = "/deleteSubEventRelation", method = RequestMethod.DELETE)
+    public JsonResult<Object> deleteSubEventRelation(@RequestParam Long complexEventId) throws IOException {
+        LOGGER.info("deleteTarget with param:{}", complexEventId);
+        return complexEventService.deleteSubEventRelation(complexEventId);
+    }
+
+    @RequestMapping(value = "/deleteTargetRelation", method = RequestMethod.DELETE)
+    public JsonResult<Object> deleteTargetRelation(@RequestParam Long complexEventId) throws IOException {
+        LOGGER.info("deleteTarget with param:{}", complexEventId);
+        return complexEventService.deleteTargetRelation(complexEventId);
+    }
+
+    @RequestMapping(value = "/deduce", method = RequestMethod.GET)
+    public JsonResult<Object> deduce(@RequestParam Long complexEventId) throws IOException {
+        LOGGER.info("deduce with complexEventId:{}", complexEventId);
+        return complexEventService.deduce(complexEventId);
     }
 }
