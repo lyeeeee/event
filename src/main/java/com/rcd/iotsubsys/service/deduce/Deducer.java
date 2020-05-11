@@ -57,7 +57,7 @@ public class Deducer implements Runnable {
      * */
     private static final int DEFAULT_LENGTH_WINDOW =  100;
 
-    private static Map<String, Integer> fakeDeviceMap;
+    private static Map<String, Integer> deviceIdMap;
 
     private Context context = new Context();
 
@@ -77,7 +77,6 @@ public class Deducer implements Runnable {
 
     public Map<String, Deque<PubSubEvent>> eventBuffer = new HashMap<>();
 
-    public Map<String ,Deque<PubSubEvent>> deduceEventBuffer = new HashMap<>();
 
     private boolean useTimeWindow = true;
 
@@ -107,8 +106,7 @@ public class Deducer implements Runnable {
     public BlockingQueue<String> messageQueue = new LinkedBlockingQueue<>();
 
     static {
-        fakeDeviceMap = new HashMap<>();
-        //fakeDeviceMap.put("");
+        deviceIdMap = new HashMap<>();
     }
 
     public Deducer(Long complexId, UserNotificationProcessImpl userNotificationProcessImpl
@@ -131,6 +129,7 @@ public class Deducer implements Runnable {
 
     public void deduce(Long complexId) throws InterruptedException {
         KnowledgeComplexEvent complexEvent = (KnowledgeComplexEvent) complexEventService.getComplexEventById(complexId).getData();
+
         JsonResult<Object> result = complexEventService.getAllSubEvent(complexId);
         // 复杂事件包括了哪些subEvent
         List<KnowledgeComplexSubEvnet> allSubEvents = (List<KnowledgeComplexSubEvnet>) result.getData();
@@ -427,7 +426,7 @@ public class Deducer implements Runnable {
             /**
              * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
              * */
-            _deduce(messageMapToKnowledgeUri, uriToFunction);
+            _deduce(messageMapToKnowledgeUri, uriToFunction, complexId);
             /**
              * 移除每个队列的队头元素,继续进行下一轮推理
              * */
@@ -438,7 +437,7 @@ public class Deducer implements Runnable {
     /**
      * 开始推理
      * */
-    private void _deduce(Map<String, String> messageMapToKnowledgeUri, Map<String, FuncDecl> uriToFunction) {
+    private void _deduce(Map<String, String> messageMapToKnowledgeUri, Map<String, FuncDecl> uriToFunction, Long complexId) {
         LOGGER.info("begin deduce once...");
         // 例如具有一个完整的复杂事件，包括两个原子事件中的属性
         solver.push();
@@ -464,7 +463,7 @@ public class Deducer implements Runnable {
             LOGGER.info("deduce result : complex event found!!!!!!!!!!!!!!!!!!!");
         } else {
             LOGGER.info("deduce result : no complex event");
-            //PublishUtil.publish(PublishUtil.LINK_FAILURE, );
+            PublishUtil.publish(PublishUtil.LINK_FAILURE, "<SYSTEM_CATE>"+complexId+1 + "</SYSTEM_CATE>");
         }
         solver.pop();
         LOGGER.info("end deduce once...");
@@ -477,9 +476,6 @@ public class Deducer implements Runnable {
         }
     }
 
-    private void takeMessageUntilCanDeduceOne() {
-
-    }
 
     /**
      * 根据定义的时间窗口或长度窗口，判断是否可以进行推理一次
