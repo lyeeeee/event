@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @program: iot-knowledge-sub-system
@@ -53,11 +54,13 @@ public class MetaEventService {
         return new JsonResult<>(save);
     }
 
-    public JsonResult<Object> getAllMetaEvent(String name) {
+    public JsonResult<Object>  getAllMetaEvent(String name) {
+        List<KnowledgeMetaEvent> list = metaEventRepository.findAll();
         if (StringUtils.isEmpty(name)) {
-            return new JsonResult<>(metaEventRepository.findAll());
+            return new JsonResult<>(list);
         } else {
-            return new JsonResult<>(metaEventRepository.findAllByName(name));
+
+            return new JsonResult<>(list.stream().filter(event -> event.getName().contains(name)).collect(Collectors.toList()));
         }
     }
 

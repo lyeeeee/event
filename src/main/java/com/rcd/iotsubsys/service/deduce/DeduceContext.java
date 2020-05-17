@@ -1,5 +1,8 @@
 package com.rcd.iotsubsys.service.deduce;
 
+import com.rcd.iotsubsys.domain.event.ComplexEvent;
+import com.rcd.iotsubsys.domain.event.ComplexEventFound;
+import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexEvent;
 import com.rcd.iotsubsys.service.event.ComplexEventService;
 import com.rcd.iotsubsys.service.event.MetaEventService;
 
@@ -31,6 +34,8 @@ public class DeduceContext {
         new SynchronousQueue<Runnable>(),
         new DeducerThreadFactory(),  new ThreadPoolExecutor.AbortPolicy());
 
+    public static BlockingQueue<KnowledgeComplexEvent> complexEventFounded = new LinkedBlockingQueue<>();
+
     @Autowired
     private ComplexEventService complexEventService;
 
@@ -41,14 +46,29 @@ public class DeduceContext {
     private UserNotificationProcessImpl userNotificationProcessImpl;
 
 
+    public void foundComplexEvent(Long complexEventId) {
+        KnowledgeComplexEvent data = (KnowledgeComplexEvent) this.complexEventService.getComplexEventById(complexEventId).getData();
+        complexEventFounded.offer(data);
+    }
+
     public synchronized void begainDeduce(Long complexId) {
-        Deducer deducer;
-        if ((deducer = deducers.get(complexId)) == null) {
-            deducer = new Deducer(complexId, userNotificationProcessImpl, complexEventService, metaEventService);
+        Deducer deducer = deducers.get(complexId);
+        if (deducer == null) {
+            deducer = new Deducer(complexId, userNotificationProcessImpl, complexEventService, metaEventService, this);
             deducers.put(complexId, deducer);
+            pool.submit(deducer);
+            LOGGER.info("create one deducer, begin deduce");
+        } else {
+            LOGGER.info("deduce task exists");
         }
-        pool.submit(deducer);
-        LOGGER.info("create one deducer, begin deduce");
+
+    }
+
+    public synchronized void stopDeduce(Long complexEventId) {
+        if (deducers.get(complexEventId) != null) {
+            deducers.get(complexEventId).shutDown();
+            deducers.remove(complexEventId);
+        }
     }
 
     static class DeducerThreadFactory implements ThreadFactory {

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 客户端ws处理程序
@@ -25,7 +26,7 @@ public class UserNotificationProcessImpl implements INotificationProcess {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(UserNotificationProcessImpl.class);
 
-    public static Map<String, List<Deducer>> topicWithDeducer = new HashMap<>();
+    public static ConcurrentHashMap<String, List<Deducer>> topicWithDeducer = new ConcurrentHashMap<>();
 
     @Override
     public String  notificationProcess(String notification) {
@@ -45,10 +46,17 @@ public class UserNotificationProcessImpl implements INotificationProcess {
         return topic;
     }
 
-    public void registDeducer(Deducer deducer, String topic) {
+    public synchronized void registDeducer(Deducer deducer, String topic) {
         List<Deducer> tmp = topicWithDeducer.get(topic);
         if (tmp == null) tmp = new ArrayList<>();
         tmp.add(deducer);
         topicWithDeducer.put(topic, tmp);
+    }
+
+    public synchronized void deRegisterDeducer(Deducer deducer, String topic) {
+        List<Deducer> tmp = topicWithDeducer.get(topic);
+        if (tmp != null) {
+            tmp.remove(deducer);
+        }
     }
 }

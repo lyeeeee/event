@@ -127,4 +127,16 @@ public class ComplexEventController {
         LOGGER.info("deduce with complexEventId:{}", complexEventId);
         return complexEventService.deduce(complexEventId);
     }
+
+    @RequestMapping(value = "/stopDeduce", method = RequestMethod.GET)
+    public JsonResult<Object> stopDeduce(@RequestParam Long complexEventId) throws IOException {
+        LOGGER.info("stop deduce with complexEventId:{}", complexEventId);
+        return complexEventService.stopDeduce(complexEventId);
+    }
+
+    @RequestMapping(value = "/getDeduceResult", method = RequestMethod.GET)
+    public JsonResult<Object> getDeduceResult() {
+        LOGGER.info("getDeduceResult....");
+        return complexEventService.getDeduceResult();
+    }
 }

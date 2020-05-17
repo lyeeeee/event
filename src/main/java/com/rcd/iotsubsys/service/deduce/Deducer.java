@@ -71,12 +71,18 @@ public class Deducer implements Runnable {
 
     public UserNotificationProcessImpl userNotificationProcessImpl;
 
+    private DeduceContext deduceContext;
+
     private ComplexEventService complexEventService;
 
     private MetaEventService metaEventService;
 
     public Map<String, Deque<PubSubEvent>> eventBuffer = new HashMap<>();
 
+    /**
+     * 记录首尾事件，避免重复推理
+     * */
+    PubSubEvent begin, end;
 
     private boolean useTimeWindow = true;
 
@@ -110,11 +116,12 @@ public class Deducer implements Runnable {
     }
 
     public Deducer(Long complexId, UserNotificationProcessImpl userNotificationProcessImpl
-    ,ComplexEventService complexEventService, MetaEventService metaEventService) {
+    ,ComplexEventService complexEventService, MetaEventService metaEventService, DeduceContext deduceContext) {
         this.complexId = complexId;
         this.userNotificationProcessImpl = userNotificationProcessImpl;
         this.complexEventService = complexEventService;
         this.metaEventService = metaEventService;
+        this.deduceContext = deduceContext;
         this.userNotificationProcessImpl.registDeducer(this, SubscribeUtil.TOPIC_TELEMTRY);
     }
 
@@ -384,69 +391,81 @@ public class Deducer implements Runnable {
             subscribed = true;
             SubscribeUtil.subscribe(SubscribeUtil.TOPIC_TELEMTRY);
         }
-        //stop = true;
+
         /**
          * 没有停止推理时，就反复获取事件，推理
          * */
         while (!stop) {
+
+            boolean hasDeduced = false;
+            boolean actuallyDeduced = false;
+
             /**
              * 将消息从buffer种取出， 构造成事件，根据设备+数据名构放入对应的双端阻塞队列中
+             *
+             *
              * */
-            while (!canDeduceOnce()) {
-                String msg = messageQueue.poll(5000, TimeUnit.MILLISECONDS);
-                if (msg == null) {
-                    continue;
-                }
-                LOGGER.info("consume one message from message queue, content :{}", msg);
-                String siteName = StringUtil.splitString(msg, "<resource><site_name>", "</site_name>");
-                String deviceName = StringUtil.splitString(msg, "<device_name>", "</device_name>");
-                String dataName = StringUtil.splitString(msg, "<data_name>", "</data_name>");
-                String value = StringUtil.splitString(msg, "<value><value>", "</value>");
-                if (StringUtils.isEmpty(siteName)
-                    || StringUtils.isEmpty(deviceName)
-                    || StringUtils.isEmpty(dataName)
-                    || StringUtils.isEmpty(value)) {
-                    continue;
-                }
-                long time = System.currentTimeMillis();
+            if (!canDeduceOnce()) {
+                String msg;
+                while ((msg = messageQueue.poll()) != null) {
+                    LOGGER.info("consume one message from message queue, content :{}", msg);
+                    String siteName = StringUtil.splitString(msg, "<siteName>", "</siteName>");
+                    String deviceName = StringUtil.splitString(msg, "<deviceName>", "</deviceName>");
+                    String dataName = StringUtil.splitString(msg, "<dataName>", "</dataName>");
+                    String value = StringUtil.splitString(msg, "<detected_value>", "</detected_value>");
+                    if (StringUtils.isEmpty(siteName)
+                        || StringUtils.isEmpty(deviceName)
+                        || StringUtils.isEmpty(dataName)
+                        || StringUtils.isEmpty(value)) {
+                        continue;
+                    }
+                    long time = System.currentTimeMillis();
 
-                PubSubEvent event = new PubSubEvent(deviceName, dataName, siteName, time, Double.parseDouble(value));
-                if (!eventConstraint.inRange(event.getDeviceName(), event.getDataName())) {
-                    continue;
+                    PubSubEvent event = new PubSubEvent(deviceName, dataName, siteName, time, Double.parseDouble(value));
+                    if (!eventConstraint.inRange(event.getDeviceName(), event.getDataName())) {
+                        continue;
+                    }
+                    if (eventConstraint.notValidValue(event)) {
+                        continue;
+                    }
+                    Deque<PubSubEvent> buffer = eventBuffer.getOrDefault(event.getDeviceNameAndDataName(), new LinkedBlockingDeque<>());
+                    buffer.offer(event);
+                    LOGGER.info("put message into event queue, queue name : {}", event.getDeviceNameAndDataName());
                 }
-                if (eventConstraint.notValidValue(event)) {
-                    continue;
-                }
-                Deque<PubSubEvent> buffer = eventBuffer.getOrDefault(event.getDeviceNameAndDataName(), new LinkedBlockingDeque<>());
-                buffer.offer(event);
-                LOGGER.info("put message into event queue, queue name : {}", event.getDeviceNameAndDataName());
+            } else {
+                /**
+                 * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
+                 * */
+                actuallyDeduced = _deduce(messageMapToKnowledgeUri, uriToFunction, complexId);
+                hasDeduced = true;
             }
-
-
-            /**
-             * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
-             * */
-            _deduce(messageMapToKnowledgeUri, uriToFunction, complexId);
             /**
              * 移除每个队列的队头元素,继续进行下一轮推理
              * */
-            clearBuffer();
+            if (hasDeduced || actuallyDeduced) clearBuffer();
+            if (!hasDeduced || !actuallyDeduced) Thread.yield();
         }
+
+        LOGGER.info("deducer task stop!");
     }
 
     /**
      * 开始推理
      * */
-    private void _deduce(Map<String, String> messageMapToKnowledgeUri, Map<String, FuncDecl> uriToFunction, Long complexId) {
-        LOGGER.info("begin deduce once...");
+    private boolean _deduce(Map<String, String> messageMapToKnowledgeUri, Map<String, FuncDecl> uriToFunction, Long complexId) {
+
+        PubSubEvent left = null, right = null;
+
         // 例如具有一个完整的复杂事件，包括两个原子事件中的属性
         solver.push();
         for (String key : eventBuffer.keySet()) {
             Deque<PubSubEvent> buffer = eventBuffer.get(key);
             BoolExpr expr = context.mkBool(false);
             int cnt = buffer.size();
-            while (cnt-- > 0) {
+            for (int i = 0; i < cnt; ++i) {
                 PubSubEvent event = buffer.removeFirst();
+                if (i == 0 ) left = event;
+                if (i == cnt-1) right = event;
                 expr = context.mkOr(
                     expr,
                     context.mkFPEq(
@@ -458,21 +477,51 @@ public class Deducer implements Runnable {
             }
             solver.add(expr);
         }
-        Status result = solver.check();
-        if (result == Status.SATISFIABLE) {
-            LOGGER.info("deduce result : complex event found!!!!!!!!!!!!!!!!!!!");
+
+        if (!(left == begin && right == end)) {
+            LOGGER.info("begin deduce once...");
+            Status result = solver.check();
+            if (result == Status.SATISFIABLE) {
+                LOGGER.info("deduce result : complex event found!!!!!!!!!!!!!!!!!!!");
+                deduceContext.foundComplexEvent(complexId);
+                String pubMessage = "<SYSTEM_CATE>"+complexId+1 + "</SYSTEM_CATE>";
+                PublishUtil.publish(PublishUtil.LINK_FAILURE, pubMessage);
+                LOGGER.info("publish message, topic :" + PublishUtil.LINK_FAILURE + ", message" + pubMessage);
+            } else {
+                LOGGER.info("deduce result : no complex event");
+            }
+            LOGGER.info("end deduce once...");
+            begin = left;
+            end = right;
+            solver.pop();
+            return true;
         } else {
-            LOGGER.info("deduce result : no complex event");
-            PublishUtil.publish(PublishUtil.LINK_FAILURE, "<SYSTEM_CATE>"+complexId+1 + "</SYSTEM_CATE>");
+            begin = left;
+            end = right;
+            solver.pop();
+            return false;
         }
-        solver.pop();
-        LOGGER.info("end deduce once...");
     }
 
     private void clearBuffer() {
+
+        long now = System.currentTimeMillis();
+
         for (String deviceNameAndDataName : eventBuffer.keySet()) {
             Deque<PubSubEvent> buffer = eventBuffer.get(deviceNameAndDataName);
-            buffer.removeFirst();
+
+            if (useDefaultWindowPolicy) {
+                while ((buffer.size() > 0) && (now - buffer.peekFirst().getTime() > DEFAULT_TIME_WINDOW))
+                    buffer.removeFirst();
+            } else {
+                if (useTimeWindow) {
+                    while ((buffer.size() > 0) && (now - buffer.peekFirst().getTime() > timeWindow))
+                        buffer.removeFirst();
+                } else {
+                    while ((buffer.size() > 0) && (buffer.size() > lenWindow))
+                        buffer.removeFirst();
+                }
+            }
         }
     }
 
@@ -481,13 +530,10 @@ public class Deducer implements Runnable {
      * 根据定义的时间窗口或长度窗口，判断是否可以进行推理一次
      * */
     private boolean canDeduceOnce() {
+        // 默认时间窗口
         if (useDefaultWindowPolicy) {
             for (String deviceNameAndDataName : eventBuffer.keySet()) {
                 if (eventBuffer.get(deviceNameAndDataName).isEmpty()) {
-                    return false;
-                }
-                Deque<PubSubEvent> buffer = eventBuffer.get(deviceNameAndDataName);
-                if (System.currentTimeMillis() - buffer.peekFirst().getTime() < DEFAULT_TIME_WINDOW) {
                     return false;
                 }
             }
@@ -498,15 +544,11 @@ public class Deducer implements Runnable {
                     if (eventBuffer.get(deviceNameAndDataName).isEmpty()) {
                         return false;
                     }
-                    Deque<PubSubEvent> buffer = eventBuffer.get(deviceNameAndDataName);
-                    if (System.currentTimeMillis() - buffer.peekFirst().getTime() < timeWindow) {
-                        return false;
-                    }
                 }
                 return true;
             } else {
                 for (String deviceNameAndDataName : eventBuffer.keySet()) {
-                    if (eventBuffer.get(deviceNameAndDataName).size() < lenWindow) {
+                    if (eventBuffer.get(deviceNameAndDataName).size() == 0) {
                         return false;
                     }
                 }
@@ -525,6 +567,13 @@ public class Deducer implements Runnable {
             e.printStackTrace();
         }
     }
+
+    public void shutDown() {
+        this.stop = true;
+        this.userNotificationProcessImpl.deRegisterDeducer(this, SubscribeUtil.TOPIC_TELEMTRY);
+    }
+
+
     // 加载所有的事件类
     private void loadClass(Map<KnowledgeMetaEvent, List<MetaEventAttrRelation>> eventWithAttrRelation) {
 
@@ -722,4 +771,6 @@ public class Deducer implements Runnable {
         Status check = solver.check();
         System.out.println(check);
     }
+
+
 }

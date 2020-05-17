@@ -15,4 +15,6 @@ public interface KnowledgeComplexSubeventRelationRepository extends JpaRepositor
     void deleteAllByComplexEventId(Long complexEventId);
     List<KnowledgeComplexSubeventRelation> getAllByComplexEventId(Long complexEventId);
     void deleteAllByType(Integer type);
+
+    KnowledgeComplexSubeventRelation findByRelationIdName(String relationIdName);
 }

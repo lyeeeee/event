@@ -10,9 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import springfox.documentation.spring.web.json.Json;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @program: iot-knowledge-sub-system
@@ -25,6 +28,9 @@ public class ComplexEventService {
 
     @Autowired
     private ComplexEventRepository complexEventRepository;
+
+    @Autowired
+    private MetaEventRepository metaEventRepository;
 
     @Autowired
     private KnowledgeComplexSubEventRepository knowledgeComplexSubEventRepository;
@@ -61,10 +67,11 @@ public class ComplexEventService {
     }
 
     public JsonResult<Object> getAllComplexEvent(String name) {
+        List<KnowledgeComplexEvent> list = complexEventRepository.findAll();
         if (StringUtils.isEmpty(name)) {
-            return new JsonResult<>(complexEventRepository.findAll());
+            return new JsonResult<>(list);
         } else {
-            return new JsonResult<>(complexEventRepository.findAllByName(name));
+            return new JsonResult<>(list.stream().filter(event -> event.getName().contains(name)).collect(Collectors.toList()));
         }
     }
 
@@ -92,15 +99,21 @@ public class ComplexEventService {
             }
             subEvnet.setSubeventName(subEventName);
             KnowledgeComplexSubEvnet save = knowledgeComplexSubEventRepository.save(subEvnet);
-            KnowledgeComplexSubeventRelation k = new KnowledgeComplexSubeventRelation();
-            k.setComplexEventId(save.getComplexEventId());
-            Date date = new Date();
-            k.setInsertTime(date.toString());
-            k.setRelationIdName(save.getId() + "");
+            if (subEvnet.getId() == null) {
+                KnowledgeComplexSubeventRelation k = new KnowledgeComplexSubeventRelation();
+                k.setComplexEventId(save.getComplexEventId());
+                Date date = new Date();
+                k.setInsertTime(date.toString());
+                k.setRelationIdName(save.getId() + "");
 
-            k.setRelationName(save.getSubeventName());
-            k.setType(0);
-            knowledgeComplexSubeventRelationRepository.save(k);
+                k.setRelationName(save.getSubeventName());
+                k.setType(0);
+                knowledgeComplexSubeventRelationRepository.save(k);
+            } else {
+                KnowledgeComplexSubeventRelation subeventRelation = knowledgeComplexSubeventRelationRepository.findByRelationIdName(subEvnet.getId() + "");
+                subeventRelation.setRelationName(subEvnet.getSubeventName());
+                knowledgeComplexSubeventRelationRepository.save(subeventRelation);
+            }
             return new JsonResult<>(save);
         }
     }
@@ -197,14 +210,20 @@ public class ComplexEventService {
             }
             knowledgeComplexTarget.setSubeventName(targetName);
             KnowledgeComplexTarget save = knowledgeComplexTargetRepository.save(knowledgeComplexTarget);
-            KnowledgeComplexTargetRelation k = new KnowledgeComplexTargetRelation();
-            k.setComplexEventId(save.getComplexEventId());
-            Date date = new Date();
-            k.setInsertTime(date.toString());
-            k.setTargetIdName(save.getId() + "");
-            k.setRelationName(save.getSubeventName());
-            k.setType(0);
-            knowledgeComplexTargetRelationRepository.save(k);
+            if (knowledgeComplexTarget.getId() == null) {
+                KnowledgeComplexTargetRelation k = new KnowledgeComplexTargetRelation();
+                k.setComplexEventId(save.getComplexEventId());
+                Date date = new Date();
+                k.setInsertTime(date.toString());
+                k.setTargetIdName(save.getId() + "");
+                k.setRelationName(save.getSubeventName());
+                k.setType(0);
+                knowledgeComplexTargetRelationRepository.save(k);
+            } else {
+                KnowledgeComplexTargetRelation targetRelation = knowledgeComplexTargetRelationRepository.findByTargetIdName(knowledgeComplexTarget.getId() + "");
+                targetRelation.setRelationName(knowledgeComplexTarget.getSubeventName());
+                knowledgeComplexTargetRelationRepository.save(targetRelation);
+            }
             return new JsonResult<>();
         }
     }
@@ -312,7 +331,36 @@ public class ComplexEventService {
             return new JsonResult<>(ResponseCode.PARAM_ILLAGLE_OR_NULL);
         } else {
             deduceContext.begainDeduce(complexEventId);
-            return new JsonResult<>();
+            return new JsonResult<>(complexEventId);
         }
     }
+
+    public JsonResult<Object> stopDeduce(Long complexEventId) {
+        if (ObjectUtils.isEmpty(complexEventId)) {
+            return new JsonResult<>(ResponseCode.PARAM_ILLAGLE_OR_NULL);
+        } else {
+            deduceContext.stopDeduce(complexEventId);
+            return new JsonResult<>(complexEventId);
+        }
+    }
+
+    public JsonResult<Object> getDeduceResult() {
+        List<KnowledgeComplexEvent> result = new ArrayList<>();
+        KnowledgeComplexEvent complexEvent = null;
+        while ((complexEvent = DeduceContext.complexEventFounded.poll()) != null) {
+            result.add(complexEvent);
+        }
+        return new JsonResult<>(result);
+    }
+    /**
+     * 获取所有原子事件
+     * */
+//    public JsonResult<Object> getAllMetaEvent(Long complexEventId) {
+//        if (ObjectUtils.isEmpty(complexEventId)) {
+//            return new JsonResult<>(ResponseCode.PARAM_ILLAGLE_OR_NULL);
+//        }
+//        List<KnowledgeComplexSubEvnet> allByComplexEventId = knowledgeComplexSubEventRepository.getAllByComplexEventId(complexEventId);
+//        List<Long> metaEventIds = allByComplexEventId.stream().map(event -> event.getSubeventId()).collect(Collectors.toList());
+//
+//    }
 }

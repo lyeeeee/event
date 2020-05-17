@@ -11,22 +11,22 @@ import com.rcd.iotsubsys.dto.response.base.ResponseCode;
 public class JsonResult<T> {
 
     private int code;
-    private String msg;
+    private String message;
     private T data;
 
     public JsonResult() {
         this.code = 0;
-        this.msg = "success";
+        this.message = "success";
     }
 
     public JsonResult(ResponseCode code) {
         this.code = code.getCode();
-        this.msg = code.getMsg();
+        this.message = code.getMsg();
     }
 
     public JsonResult(T data) {
         this.code = 0;
-        this.msg = "success";
+        this.message = "success";
         this.data = data;
     }
 
@@ -39,11 +39,11 @@ public class JsonResult<T> {
     }
 
     public String getMsg() {
-        return msg;
+        return message;
     }
 
     public void setMsg(String msg) {
-        this.msg = msg;
+        this.message = msg;
     }
 
     public T getData() {
@@ -58,7 +58,7 @@ public class JsonResult<T> {
     public String toString() {
         return "JsonResult{" +
             "code=" + code +
-            ", msg='" + msg + '\'' +
+            ", message='" + message + '\'' +
             ", data=" + data +
             '}';
     }

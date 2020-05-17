@@ -82,37 +82,30 @@ public class KnowledgeService {
         List<KnowledgeDetail> ret = new ArrayList<>();
         List<KnowledgeKnowledge> knowledges = knowledgeRepository.findAll();
         System.out.println("knowledges  size:" + knowledges.size()  + "===================");
-        if (!ObjectUtils.isEmpty(metaDir)) {
-            knowledges = knowledges.stream()
-                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(metaDir))
-                .collect(Collectors.toList());
-            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
-        } else if (!ObjectUtils.isEmpty(department))  {
-            knowledges = knowledges.stream()
-                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(department))
-                .collect(Collectors.toList());
-            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
-        } else if (!ObjectUtils.isEmpty(field))  {
-            knowledges = knowledges.stream()
-                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(field))
-                .collect(Collectors.toList());
-            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
-        }
+//        if (!ObjectUtils.isEmpty(metaDir)) {
+//            knowledges = knowledges.stream()
+//                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(metaDir))
+//                .collect(Collectors.toList());
+//            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+//        } else if (!ObjectUtils.isEmpty(department))  {
+//            knowledges = knowledges.stream()
+//                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(department))
+//                .collect(Collectors.toList());
+//            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+//        } else if (!ObjectUtils.isEmpty(field))  {
+//            knowledges = knowledges.stream()
+//                .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeDir().equals(field))
+//                .collect(Collectors.toList());
+//            System.out.println("knowledges  size:" + knowledges.size()  + "===================");
+//        }
         if (!ObjectUtils.isEmpty(knowledgeName)) {
-//            List<KnowledgeKnowledge> tmp = new ArrayList<>();
-//            for (KnowledgeKnowledge k : knowledges) {
-//                System.out.println(k.getKnowledgeName());
-//                if (k.getKnowledgeName().contains(knowledgeName)) {
-//                    tmp.add(k);
-//                }
-//            }
-//            knowledges = tmp;
             knowledges = knowledges.stream()
                 .filter(knowledgeKnowledge -> knowledgeKnowledge.getKnowledgeName().contains(knowledgeName))
                 .collect(Collectors.toList());
             System.out.println("knowledges  size:" + knowledges.size()  + "===================");
         }
-        knowledges.forEach( elem -> {
+        for (int i = 0;i < knowledges.size(); ++i) {
+            KnowledgeKnowledge elem = knowledges.get(i);
             Long cur = elem.getKnowledgeDir();
             List<DirectoryNode> pre = new ArrayList<>();
             while (cur != -1) {
@@ -131,7 +124,16 @@ public class KnowledgeService {
             detail.setMetaDirId(pre.get(0).getId());
             detail.setKnowledgeSynopsis(null);
             ret.add(detail);
-        });
+        }
+        if (!ObjectUtils.isEmpty(department)) {
+            ret = ret.stream().filter(detail-> detail.getDepartmentId().equals(department)).collect(Collectors.toList());
+        }
+        if (!ObjectUtils.isEmpty(field)) {
+            ret = ret.stream().filter(detail-> detail.getFieldId().equals(field)).collect(Collectors.toList());
+        }
+        if (!ObjectUtils.isEmpty(metaDir)) {
+            ret = ret.stream().filter(detail-> detail.getMetaDirId().equals(metaDir)).collect(Collectors.toList());
+        }
         return new JsonResult<>(ret);
     }
 }
