@@ -15,6 +15,7 @@ import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.ontology.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -74,7 +75,7 @@ public class KnowledgeService {
         KnowledgeKnowledge knowledge = knowledgeRepository.getOne(metaEvent.getKnowledgeId());
         long fileId = knowledge.getKnowldegeFileId();
         KnowledgeFile file = knowledgeFileRepository.getOne(fileId);
-        List<String> knowledgeProperties = ontologyService.getKnowledgeProperties(file.getFileName(),file.getModelName(), knowledge.getKnowledgeUri());
+        List<String> knowledgeProperties = ontologyService.getKnowledgeProperties(file.getFileName(),file.getTdbModelName(), knowledge.getKnowledgeUri());
         return new JsonResult<>(knowledgeProperties);
     }
 
@@ -135,5 +136,25 @@ public class KnowledgeService {
             ret = ret.stream().filter(detail-> detail.getMetaDirId().equals(metaDir)).collect(Collectors.toList());
         }
         return new JsonResult<>(ret);
+    }
+
+    public JsonResult<Object> getAllModel() {
+        return new JsonResult<>(knowledgeFileRepository.findAll());
+    }
+
+    @Transactional
+    public JsonResult<Object> deleteModel(Long fileId) {
+
+        KnowledgeFile file = knowledgeFileRepository.getOne(fileId);
+        ontologyService.deleteModel(file);
+
+        //删除树节点中的node
+        //暂时不删除，通过web界面手动删除
+
+        //删除knowledge表中的知识
+        knowledgeRepository.deleteAllByModelName(file.getTdbModelName());
+        // 删除文件记录
+        knowledgeFileRepository.deleteById(fileId);
+        return new JsonResult<>();
     }
 }

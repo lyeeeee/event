@@ -30,7 +30,7 @@ spring:
 #        url: jdbc:mysql://localhost:3306/iot_knowledge_sub_system?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
         url: jdbc:mysql://localhost:3306/iotknowledge?useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
         username: root
-        password: root
+        password: 12345678
         hikari:
             auto-commit: false
             data-source-properties:

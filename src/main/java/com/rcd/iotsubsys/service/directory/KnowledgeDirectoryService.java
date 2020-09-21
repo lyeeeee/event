@@ -49,7 +49,9 @@ public class KnowledgeDirectoryService {
             return new JsonResult<>();
         }
         if (cascade) {
-           childs.forEach(c -> directoryRepository.delete(c));
+           for (int i = 0;i < childs.size(); ++i) {
+               deleteDirectoryNode(childs.get(i).getId(), true);
+           }
         } else {
             return new JsonResult<>(ResponseCode.DIRECTORY_NODE_HAS_CHILD);
         }

@@ -67,6 +67,20 @@ public class KnowledgeKnowledge implements Serializable {
     @Column(name = "dir_node_id", nullable = false)
     private Long dirNodeId;
 
+    /***
+     * 所属模型名
+     */
+    @Column(name = "model_name", nullable = false)
+    private String modelName;
+
+    public String getModelName() {
+        return modelName;
+    }
+
+    public void setModelName(String modelName) {
+        this.modelName = modelName;
+    }
+
     public Long getId() {
         return id;
     }

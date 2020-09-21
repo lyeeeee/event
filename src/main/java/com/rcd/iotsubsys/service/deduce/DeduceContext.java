@@ -1,7 +1,6 @@
 package com.rcd.iotsubsys.service.deduce;
 
 import com.rcd.iotsubsys.domain.event.ComplexEvent;
-import com.rcd.iotsubsys.domain.event.ComplexEventFound;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexEvent;
 import com.rcd.iotsubsys.service.event.ComplexEventService;
 import com.rcd.iotsubsys.service.event.MetaEventService;

@@ -17,9 +17,9 @@ public class PublishUtil {
     private static int port = 9030;
 
     //wsn程序中的地址
-    public static final String WSN_ADDR = "http://127.0.0.1:9011/wsn-core";
+    public static final String WSN_ADDR = "http://192.168.253.1:9011/wsn-core";
     //sendAddr中保证不和其他发布程序的端口冲突
-    public static final String SEND_ADDR_PREFIX = "http://127.0.0.1:";
+    public static final String SEND_ADDR_PREFIX = "http://192.168.253.11:";
 
     private static final String SEND_ADDR_SUFFIX = "/wsn-send";
 

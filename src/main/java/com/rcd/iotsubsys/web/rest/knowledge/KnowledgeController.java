@@ -75,6 +75,18 @@ public class KnowledgeController {
         return knowledgeService.getKnowledgeProperties(metaEventId);
     }
 
+    @RequestMapping(value = "/getAllModel", method = RequestMethod.GET)
+    public JsonResult<Object> getAllModel() throws IOException {
+        LOGGER.info("getAllModel...");
+        return knowledgeService.getAllModel();
+    }
+
+    @RequestMapping(value = "/deleteModel", method = RequestMethod.DELETE)
+    public JsonResult<Object> deleteModel(Long fileId) throws IOException {
+        LOGGER.info("deleteModel with param:{}", fileId);
+        return knowledgeService.deleteModel(fileId);
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         //创建dataset和model
 //        Dataset dataset = TDBFactory.createDataset("dbData");

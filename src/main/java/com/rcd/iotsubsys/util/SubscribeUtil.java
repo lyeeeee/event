@@ -12,12 +12,12 @@ import java.util.Map;
  */
 public class SubscribeUtil {
 
-    private static final String WSN_ADDR = "http://127.0.0.1:9011/wsn-core";//固定，发布订阅机器ip
+    private static final String WSN_ADDR = "http://192.168.253.1:9011/wsn-core";//固定，发布订阅机器ip
 
-    private static final String SENT_ADDR = "http://127.0.0.1:9020/wsn-subscribe";//发布订阅的机器ip，端口不能重复
+    private static final String SENT_ADDR = "http://192.168.253.11:9020/wsn-subscribe";//发布订阅的机器ip，端口不能重复
 
 
-    public static final String TOPIC_TELEMTRY = "telemetry";
+    public static final String TOPIC_TELEMTRY = "data";
 
 
     public static void subscribe(String topic) {

@@ -402,41 +402,15 @@ public class Deducer implements Runnable {
 
             /**
              * 将消息从buffer种取出， 构造成事件，根据设备+数据名构放入对应的双端阻塞队列中
-             *
-             *
              * */
             if (!canDeduceOnce()) {
-                String msg;
-                while ((msg = messageQueue.poll()) != null) {
-                    LOGGER.info("consume one message from message queue, content :{}", msg);
-                    String siteName = StringUtil.splitString(msg, "<siteName>", "</siteName>");
-                    String deviceName = StringUtil.splitString(msg, "<deviceName>", "</deviceName>");
-                    String dataName = StringUtil.splitString(msg, "<dataName>", "</dataName>");
-                    String value = StringUtil.splitString(msg, "<detected_value>", "</detected_value>");
-                    if (StringUtils.isEmpty(siteName)
-                        || StringUtils.isEmpty(deviceName)
-                        || StringUtils.isEmpty(dataName)
-                        || StringUtils.isEmpty(value)) {
-                        continue;
-                    }
-                    long time = System.currentTimeMillis();
-
-                    PubSubEvent event = new PubSubEvent(deviceName, dataName, siteName, time, Double.parseDouble(value));
-                    if (!eventConstraint.inRange(event.getDeviceName(), event.getDataName())) {
-                        continue;
-                    }
-                    if (eventConstraint.notValidValue(event)) {
-                        continue;
-                    }
-                    Deque<PubSubEvent> buffer = eventBuffer.getOrDefault(event.getDeviceNameAndDataName(), new LinkedBlockingDeque<>());
-                    buffer.offer(event);
-                    LOGGER.info("put message into event queue, queue name : {}", event.getDeviceNameAndDataName());
-                }
+                consumeMessage(eventConstraint);
             } else {
                 /**
                  * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
                  * */
                 actuallyDeduced = _deduce(messageMapToKnowledgeUri, uriToFunction, complexId);
+                consumeMessage(eventConstraint);
                 hasDeduced = true;
             }
             /**
@@ -447,6 +421,35 @@ public class Deducer implements Runnable {
         }
 
         LOGGER.info("deducer task stop!");
+    }
+
+    private void consumeMessage(EventConstraint eventConstraint) {
+        String msg;
+        while ((msg = messageQueue.poll()) != null) {
+            LOGGER.info("consume one message from message queue, content :{}", msg);
+            String siteName = StringUtil.splitString(msg, "<siteName>", "</siteName>");
+            String deviceName = StringUtil.splitString(msg, "<deviceName>", "</deviceName>");
+            String dataName = StringUtil.splitString(msg, "<dataName>", "</dataName>");
+            String value = StringUtil.splitString(msg, "<detected_value>", "</detected_value>");
+            if (StringUtils.isEmpty(siteName)
+                || StringUtils.isEmpty(deviceName)
+                || StringUtils.isEmpty(dataName)
+                || StringUtils.isEmpty(value)) {
+                continue;
+            }
+            long time = System.currentTimeMillis();
+
+            PubSubEvent event = new PubSubEvent(deviceName, dataName, siteName, time, Double.parseDouble(value));
+            if (!eventConstraint.inRange(event.getDeviceName(), event.getDataName())) {
+                continue;
+            }
+            if (eventConstraint.notValidValue(event)) {
+                continue;
+            }
+            Deque<PubSubEvent> buffer = eventBuffer.getOrDefault(event.getDeviceNameAndDataName(), new LinkedBlockingDeque<>());
+            buffer.offer(event);
+            LOGGER.info("put message into event queue, queue name : {}", event.getDeviceNameAndDataName());
+        }
     }
 
     /**
@@ -485,8 +488,8 @@ public class Deducer implements Runnable {
                 LOGGER.info("deduce result : complex event found!!!!!!!!!!!!!!!!!!!");
                 deduceContext.foundComplexEvent(complexId);
                 String pubMessage = "<SYSTEM_CATE>"+complexId+1 + "</SYSTEM_CATE>";
-                PublishUtil.publish(PublishUtil.LINK_FAILURE, pubMessage);
-                LOGGER.info("publish message, topic :" + PublishUtil.LINK_FAILURE + ", message" + pubMessage);
+                PublishUtil.publish(PublishUtil.DEVICE_FAILURE_MORE, pubMessage);
+                LOGGER.info("publish message, topic :" + PublishUtil.DEVICE_FAILURE_MORE + ", message" + pubMessage);
             } else {
                 LOGGER.info("deduce result : no complex event");
             }
@@ -770,7 +773,8 @@ public class Deducer implements Runnable {
         }
         Status check = solver.check();
         System.out.println(check);
+        String property = System.getProperty("java.library.path");
+        System.out.println(property);
     }
-
 
 }

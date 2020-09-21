@@ -98,8 +98,9 @@ public class ComplexEventService {
                 subEventName += "in" + subEvnet.getRelationValue();
             }
             subEvnet.setSubeventName(subEventName);
-            KnowledgeComplexSubEvnet save = knowledgeComplexSubEventRepository.save(subEvnet);
+            KnowledgeComplexSubEvnet save = null;
             if (subEvnet.getId() == null) {
+                save = knowledgeComplexSubEventRepository.save(subEvnet);
                 KnowledgeComplexSubeventRelation k = new KnowledgeComplexSubeventRelation();
                 k.setComplexEventId(save.getComplexEventId());
                 Date date = new Date();
@@ -110,6 +111,7 @@ public class ComplexEventService {
                 k.setType(0);
                 knowledgeComplexSubeventRelationRepository.save(k);
             } else {
+                knowledgeComplexSubEventRepository.save(subEvnet);
                 KnowledgeComplexSubeventRelation subeventRelation = knowledgeComplexSubeventRelationRepository.findByRelationIdName(subEvnet.getId() + "");
                 subeventRelation.setRelationName(subEvnet.getSubeventName());
                 knowledgeComplexSubeventRelationRepository.save(subeventRelation);
@@ -209,8 +211,9 @@ public class ComplexEventService {
                 targetName += "in" + knowledgeComplexTarget.getRelationValue();
             }
             knowledgeComplexTarget.setSubeventName(targetName);
-            KnowledgeComplexTarget save = knowledgeComplexTargetRepository.save(knowledgeComplexTarget);
+            KnowledgeComplexTarget save = null;
             if (knowledgeComplexTarget.getId() == null) {
+                save = knowledgeComplexTargetRepository.save(knowledgeComplexTarget);
                 KnowledgeComplexTargetRelation k = new KnowledgeComplexTargetRelation();
                 k.setComplexEventId(save.getComplexEventId());
                 Date date = new Date();
@@ -220,6 +223,7 @@ public class ComplexEventService {
                 k.setType(0);
                 knowledgeComplexTargetRelationRepository.save(k);
             } else {
+                knowledgeComplexTargetRepository.save(knowledgeComplexTarget);
                 KnowledgeComplexTargetRelation targetRelation = knowledgeComplexTargetRelationRepository.findByTargetIdName(knowledgeComplexTarget.getId() + "");
                 targetRelation.setRelationName(knowledgeComplexTarget.getSubeventName());
                 knowledgeComplexTargetRelationRepository.save(targetRelation);

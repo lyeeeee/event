@@ -12,5 +12,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface KnowledgeRepository extends JpaRepository<KnowledgeKnowledge, Long> {
 
     KnowledgeKnowledge getKnowledgeKnowledgeByDirNodeId(Long id);
-
+    void deleteAllByModelName(String modelName);
 }

@@ -1,0 +1,118 @@
+Manifest-Version: 1.0
+Class-Path: attoparser-2.0.5.RELEASE.jar profiler-1.0.2.jar rdf4j-rio-
+ trig-2.4.6.jar rdf4j-repository-sparql-2.4.6.jar liquibase-slf4j-2.0.
+ 0.jar hibernate-entitymanager-5.2.17.Final.jar simpleclient_dropwizar
+ d-0.5.0.jar jackson-datatype-jdk8-2.9.7.jar junit-4.12.jar rdf4j-conf
+ ig-2.4.6.jar httpmime-4.5.6.jar spring-tx-5.0.11.RELEASE.jar httpclie
+ nt-cache-4.5.6.jar liquibase-core-3.5.5.jar jul-to-slf4j-1.7.25.jar r
+ df4j-http-protocol-2.4.6.jar spring-boot-starter-2.0.7.RELEASE.jar an
+ imal-sniffer-annotations-1.14.jar mysql-connector-java-5.1.47.jar jcl
+ -over-slf4j-1.7.25.jar jackson-annotations-2.9.0.jar jsonld-java-0.12
+ .5.jar lucene-spatial3d-6.6.1.jar simpleclient-0.5.0.jar metrics-spri
+ ng-3.1.3.jar jena-shaded-guava-3.13.1.jar spring-jcl-5.0.11.RELEASE.j
+ ar javax.interceptor-api-1.2.2.jar javax.el-3.0.0.jar metrics-annotat
+ ion-3.2.6.jar opencsv-4.2.jar spring-boot-loader-tools-2.0.7.RELEASE.
+ jar cglib-3.2.5.jar rdf4j-sail-model-2.4.6.jar spring-orm-5.0.11.RELE
+ ASE.jar hibernate-commons-annotations-5.0.1.Final.jar slf4j-api-1.7.2
+ 5.jar metrics-servlets-3.2.6.jar jjwt-jackson-0.10.5.jar rdf4j-reposi
+ tory-http-2.4.6.jar commons-pool2-2.5.0.jar jena-core-3.13.1.jar rdf4
+ j-rio-api-2.4.6.jar mapstruct-jdk8-1.2.0.Final.jar j2objc-annotations
+ -1.1.jar undertow-websockets-jsr-1.4.26.Final.jar thymeleaf-3.0.11.RE
+ LEASE.jar commons-collections-3.2.2.jar commons-lang-2.6.jar lucene-j
+ oin-6.6.1.jar problem-violations-0.24.0-RC.0.jar mongodb-driver-core-
+ 3.6.4.jar rdf4j-rio-rdfxml-2.4.6.jar javax.activation-api-1.2.0.jar s
+ pring-cloud-cloudfoundry-connector-2.0.4.RELEASE.jar rdf4j-queryrende
+ r-2.4.6.jar graphdb-free-runtime-8.9.0.jar h2-1.4.197.jar rdf4j-query
+ resultio-api-2.4.6.jar jboss-annotations-api_1.2_spec-1.0.2.Final.jar
+  metrics-core-3.2.6.jar fluent-hc-4.5.6.jar jboss-websocket-api_1.1_s
+ pec-1.1.3.Final.jar spring-boot-starter-logging-2.0.7.RELEASE.jar spr
+ ing-aspects-5.0.11.RELEASE.jar spring-boot-starter-cloud-connectors-2
+ .0.7.RELEASE.jar thymeleaf-spring5-3.0.11.RELEASE.jar jjwt-api-0.10.5
+ .jar rdf4j-repository-event-2.4.6.jar rdf4j-repository-api-2.4.6.jar 
+ springfox-swagger2-2.9.2.jar spring-boot-starter-data-jpa-2.0.7.RELEA
+ SE.jar trove4j-2.0.2.jar xnio-nio-3.3.8.Final.jar woodstox-core-asl-4
+ .4.1.jar springfox-swagger-common-2.9.2.jar solr-solrj-6.6.5.jar rdf4
+ j-sail-spin-2.4.6.jar HikariCP-2.7.9.jar springfox-schema-2.9.2.jar h
+ ttpcore-4.4.10.jar lucene-core-6.6.1.jar spring-core-5.0.11.RELEASE.j
+ ar rdf4j-sail-federation-2.4.6.jar logback-core-1.2.3.jar guava-25.1-
+ jre.jar spring-jdbc-5.0.11.RELEASE.jar joda-time-2.9.9.jar HdrHistogr
+ am-2.1.10.jar javax.transaction-api-1.2.jar hibernate-core-5.2.17.Fin
+ al.jar problem-spring-web-0.24.0-RC.0.jar lucene-misc-6.6.1.jar jhips
+ ter-framework-2.0.29.jar xnio-api-3.3.8.Final.jar rdf4j-rio-languages
+ -2.4.6.jar jackson-core-2.9.7.jar hibernate-envers-5.2.17.Final.jar r
+ df4j-rio-turtle-2.4.6.jar commons-cli-1.4.jar byte-buddy-1.7.11.jar s
+ pring-boot-starter-jdbc-2.0.7.RELEASE.jar logstash-logback-encoder-5.
+ 2.jar faux-pas-0.8.0.jar jackson-module-parameter-names-2.9.7.jar rdf
+ 4j-util-2.4.6.jar asm-5.2.jar jline-3.5.1.jar fastjson-1.2.62.jar spr
+ ing-boot-devtools-2.0.7.RELEASE.jar rdf4j-console-2.4.6.jar commons-c
+ ompress-1.19.jar rdf4j-sail-base-2.4.6.jar ant-1.9.6.jar lucene-query
+ parser-6.6.1.jar rdf4j-queryalgebra-evaluation-2.4.6.jar commons-csv-
+ 1.7.jar jena-tdb-3.13.1.jar rdf4j-storage-2.4.6.jar spring-boot-start
+ er-json-2.0.7.RELEASE.jar lucene-spatial-extras-6.6.1.jar spring-cont
+ ext-support-5.0.11.RELEASE.jar jsr305-3.0.2.jar rdf4j-queryparser-ser
+ ql-2.4.6.jar spring-context-5.0.11.RELEASE.jar jackson-datatype-probl
+ em-0.21.0.jar ant-launcher-1.9.6.jar metrics-json-3.2.6.jar LatencyUt
+ ils-2.0.3.jar problem-0.21.0.jar jedis-3.1.0.jar spring-webmvc-5.0.11
+ .RELEASE.jar commons-compiler-3.0.11.jar httpcore-nio-4.4.10.jar rdf4
+ j-queryparser-sparql-2.4.6.jar commons-lang3-3.7.jar jackson-datatype
+ -hppc-2.9.7.jar rdf4j-sail-memory-2.4.6.jar rdf4j-rio-nquads-2.4.6.ja
+ r javax.mail-1.6.2.jar rdf4j-repository-manager-2.4.6.jar rdf4j-query
+ resultio-binary-2.4.6.jar spring-security-web-5.0.10.RELEASE.jar spri
+ ng-boot-starter-actuator-2.0.7.RELEASE.jar rdf4j-query-2.4.6.jar jena
+ -iri-3.13.1.jar swagger-models-1.5.20.jar commons-math3-3.5.jar sprin
+ g-cloud-spring-service-connector-2.0.4.RELEASE.jar rdf4j-rio-rdfjson-
+ 2.4.6.jar lucene-queries-6.6.1.jar janino-3.0.11.jar metrics-jvm-3.2.
+ 6.jar commons-codec-1.11.jar jaxb-api-2.3.1.jar httpclient-4.5.6.jar 
+ spring-boot-starter-aop-2.0.7.RELEASE.jar thymeleaf-extras-java8time-
+ 3.0.2.RELEASE.jar javax.servlet-api-3.1.0.jar spring-boot-2.0.7.RELEA
+ SE.jar mapdb-1.0.8.jar rdf4j-queryresultio-sparqljson-2.4.6.jar probl
+ em-spring-common-0.24.0-RC.0.jar metrics-servlet-3.2.6.jar rdf4j-http
+ -server-spring-2.4.6.jar collection-0.7.jar rdf4j-rio-binary-2.4.6.ja
+ r rdf4j-repository-sail-2.4.6.jar activation-1.1.jar spring-boot-actu
+ ator-2.0.7.RELEASE.jar apiguardian-api-1.0.0.jar rdf4j-rio-n3-2.4.6.j
+ ar springfox-bean-validators-2.9.2.jar rdf4j-queryresultio-text-2.4.6
+ .jar spring-cloud-localconfig-connector-2.0.4.RELEASE.jar spring-expr
+ ession-5.0.11.RELEASE.jar commons-io-2.6.jar spring-beans-5.0.11.RELE
+ ASE.jar validation-api-2.0.1.Final.jar concurrentlinkedhashmap-lru-1.
+ 4.2.jar rdf4j-queryalgebra-geosparql-2.4.6.jar spring-boot-starter-un
+ dertow-2.0.7.RELEASE.jar rdf4j-queryparser-api-2.4.6.jar spring-web-5
+ .0.11.RELEASE.jar rdf4j-model-2.4.6.jar logback-classic-1.2.3.jar rdf
+ 4j-queryalgebra-model-2.4.6.jar micrometer-core-1.0.8.jar undertow-se
+ rvlet-1.4.26.Final.jar spatial4j-0.7.jar lucene-analyzers-common-6.6.
+ 1.jar springfox-spi-2.9.2.jar stax2-api-3.1.4.jar hppc-0.7.1.jar snap
+ py-0.4.jar rdf4j-rio-trix-2.4.6.jar rdf4j-queryresultio-sparqlxml-2.4
+ .6.jar checker-qual-2.0.0.jar rdf4j-sail-inferencer-2.4.6.jar commons
+ -text-1.3.jar lucene-memory-6.6.1.jar rdf4j-client-2.4.6.jar caffeine
+ -2.6.2.jar commons-httpclient-3.1.jar classmate-1.3.4.jar undertow-co
+ re-1.4.26.Final.jar log4j-to-slf4j-2.10.0.jar rdf4j-sail-nativerdf-2.
+ 4.6.jar commons-logging-1.2.jar libthrift-0.12.0.jar spring-security-
+ core-5.0.10.RELEASE.jar jackson-databind-2.9.7.jar snakeyaml-1.19.jar
+  hibernate-jpa-2.1-api-1.0.2.Final.jar rdf4j-spin-2.4.6.jar hibernate
+ -validator-6.0.13.Final.jar antlr-2.7.7.jar jta-1.1.jar jackson-datat
+ ype-hibernate5-2.9.7.jar javax.annotation-api-1.3.2.jar spring-data-c
+ ommons-2.0.12.RELEASE.jar commons-collections4-4.1.jar simpleclient_s
+ ervlet-0.5.0.jar spring-boot-starter-web-2.0.7.RELEASE.jar spring-boo
+ t-starter-mail-2.0.7.RELEASE.jar jena-arq-3.13.1.jar spring-cloud-her
+ oku-connector-2.0.4.RELEASE.jar jena-base-3.13.1.jar rdf4j-rio-dataty
+ pes-2.4.6.jar noggit-0.6.jar commons-beanutils-1.9.3.jar rdf4j-sail-a
+ pi-2.4.6.jar spring-aop-5.0.11.RELEASE.jar rdf4j-repository-contextaw
+ are-2.4.6.jar spring-cloud-connectors-core-2.0.4.RELEASE.jar jboss-tr
+ ansaction-api_1.2_spec-1.0.1.Final.jar javasmt-solver-z3-z3-4.4.1-155
+ 8-gf96cfea.jar bson-3.6.4.jar jandex-2.0.3.Final.jar simpleclient_com
+ mon-0.5.0.jar jackson-datatype-jsr310-2.9.7.jar spring-data-jpa-2.0.1
+ 2.RELEASE.jar javassist-3.22.0-GA.jar dom4j-1.6.1.jar metrics-healthc
+ hecks-3.2.6.jar mongodb-driver-sync-3.8.1.jar spring-security-config-
+ 5.0.10.RELEASE.jar jackson-module-afterburner-2.9.7.jar lucene-sandbo
+ x-6.6.1.jar log4j-api-2.10.0.jar spring-plugin-metadata-1.2.0.RELEASE
+ .jar spring-boot-autoconfigure-2.0.7.RELEASE.jar springfox-spring-web
+ -2.9.2.jar swagger-annotations-1.5.20.jar unbescape-1.1.6.RELEASE.jar
+  jjwt-impl-0.10.5.jar jts-core-1.15.1.jar spring-boot-starter-thymele
+ af-2.0.7.RELEASE.jar aspectjweaver-1.8.13.jar rdf4j-rio-ntriples-2.4.
+ 6.jar springfox-core-2.9.2.jar error_prone_annotations-2.1.3.jar spri
+ ng-boot-actuator-autoconfigure-2.0.7.RELEASE.jar spring-boot-starter-
+ security-2.0.7.RELEASE.jar httpclient-osgi-4.5.6.jar rdf4j-rio-jsonld
+ -2.4.6.jar rdf4j-repository-dataset-2.4.6.jar rdf4j-http-client-2.4.6
+ .jar spring-plugin-core-1.2.0.RELEASE.jar spring-security-data-5.0.10
+ .RELEASE.jar lucene-highlighter-6.6.1.jar zookeeper-3.4.10.jar
+Main-Class: com.rcd.iotsubsys.IotKnowledgeSubSystemApp
+

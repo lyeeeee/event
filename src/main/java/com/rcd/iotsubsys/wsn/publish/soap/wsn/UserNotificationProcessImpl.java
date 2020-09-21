@@ -1,7 +1,6 @@
 package com.rcd.iotsubsys.wsn.publish.soap.wsn;
 
 import com.rcd.iotsubsys.wsn.publish.soap.INotificationProcess;
-import sun.misc.BASE64Decoder;
 
 import javax.jws.WebService;
 import java.awt.*;

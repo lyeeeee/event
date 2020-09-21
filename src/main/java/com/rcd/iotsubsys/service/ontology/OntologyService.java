@@ -3,6 +3,7 @@ package com.rcd.iotsubsys.service.ontology;
 import com.rcd.iotsubsys.common.directory.DirectoryNodeOwner;
 import com.rcd.iotsubsys.config.Constant;
 import com.rcd.iotsubsys.domain.directory.DirectoryNode;
+import com.rcd.iotsubsys.domain.knowledge.KnowledgeFile;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeKnowledge;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
@@ -115,7 +116,7 @@ public class OntologyService{
         OntClass featureOfInterest = ontModel.getOntClass(Constant.SSN_FEATURE_OF_INTEREST_URI);
         ExtendedIterator<OntClass> ontClassExtendedIterator = featureOfInterest.listSubClasses();
         List<OntClass> subClass = ontClassExtendedIterator.toList();
-        resolveKnowledgeAndDirectory(subClass, metaId.get(metaId.size()-1), fileId);
+        resolveKnowledgeAndDirectory(subClass, metaId.get(metaId.size()-1), fileId, modelName);
         database.commit();
         database.end();
     }
@@ -123,7 +124,7 @@ public class OntologyService{
     /**
      * 解析FeatureOfInterest，并增加对应的目录结构。
      * */
-    private void resolveKnowledgeAndDirectory(List<OntClass> ontClasss, Long metaId, long fileId) {
+    private void resolveKnowledgeAndDirectory(List<OntClass> ontClasss, Long metaId, long fileId, String modelName) {
         if (ObjectUtils.isEmpty(ontClasss)) {
             return;
         } else {
@@ -139,7 +140,7 @@ public class OntologyService{
                 node = (DirectoryNode) result.getData();
                 // 有子类继续深搜
                 if (tmp.hasSubClass()) {
-                    resolveKnowledgeAndDirectory(tmp.listSubClasses().toList(), node.getId(), fileId);
+                    resolveKnowledgeAndDirectory(tmp.listSubClasses().toList(), node.getId(), fileId, modelName);
                 } else {// 没有子类，创建知识，并且如果知识有实例就创建实例
 
                     // 创建知识
@@ -150,6 +151,7 @@ public class OntologyService{
                     knowledge.setKnowledgeDir(metaId);
                     knowledge.setKnowldegeFileId(fileId);
                     knowledge.setDirNodeId(node.getId());
+                    knowledge.setModelName(modelName);
                     KnowledgeKnowledge ret = knowledgeRepository.save(knowledge);
 
                     List<? extends OntResource> ontResources = tmp.listInstances().toList();
@@ -173,6 +175,7 @@ public class OntologyService{
                             knowledgeInstance.setKnowledgeUri(o.getURI());
                             knowledgeInstance.setType(1);
                             knowledgeInstance.setDirNodeId(instanceDirNode.getId());
+                            knowledgeInstance.setModelName(modelName);
                             knowledgeRepository.save(knowledgeInstance);
                         });
                     }
@@ -195,5 +198,19 @@ public class OntologyService{
             ret.add(propertyUri);
         });
         return ret;
+    }
+
+    public void deleteModel(KnowledgeFile file) {
+        String tdbModelName = file.getTdbModelName();
+        database.begin(ReadWrite.WRITE);
+        database.removeNamedModel(tdbModelName);
+        database.commit();
+        LOGGER.info("delete tdb model: {}", tdbModelName);
+        FileUtils.deleteQuietly(new File(Constant.ONTOLOGY_FILE_DIR + file.getFileName()));
+        LOGGER.info("delete model file: {}", file.getFileName());
+        if (owlResourceDataMap.get(file.getFileName()) != null ) {
+            owlResourceDataMap.remove(file.getFileName());
+            LOGGER.info("remove owlResource: {}", file.getFileName());
+        }
     }
 }
