@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @program: iot-knowledge-sub-system
@@ -21,4 +22,12 @@ public interface DirectoryRepository extends JpaRepository<DirectoryNode, Long> 
      List<DirectoryNode> findAllByParentId(Long parentId);
 
      List<DirectoryNode> findAllByOwner(String owner);
+
+     List<DirectoryNode> findAllByValue(String value);
+
+     List<DirectoryNode> findAllByParentIdIn(Set<Long> ids);
+
+     List<DirectoryNode> getAllByValue(String value);
+
+    List<DirectoryNode> getAllByIdIn(List<Long> ids);
 }

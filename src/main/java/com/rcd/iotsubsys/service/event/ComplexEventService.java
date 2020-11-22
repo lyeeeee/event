@@ -1,5 +1,7 @@
 package com.rcd.iotsubsys.service.event;
 
+import com.alibaba.fastjson.JSONObject;
+import com.rcd.iotsubsys.domain.directory.DirectoryNode;
 import com.rcd.iotsubsys.domain.event.FolumaKnowledge;
 import com.rcd.iotsubsys.domain.knowledge.*;
 import com.rcd.iotsubsys.dto.response.JsonResult;
@@ -7,17 +9,20 @@ import com.rcd.iotsubsys.dto.response.base.ResponseCode;
 import com.rcd.iotsubsys.repository.event.*;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.deduce.DeduceContext;
+import com.rcd.iotsubsys.service.directory.KnowledgeDirectoryService;
+import com.rcd.iotsubsys.service.knowledge.DirectoryManagementService;
 import com.rcd.iotsubsys.service.knowledge.KnowledgeService;
+import org.apache.lucene.store.Directory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import sun.security.util.AuthResources_ko;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +63,12 @@ public class ComplexEventService {
 
     @Autowired
     private DeduceContext deduceContext;
+
+    @Autowired
+    private KnowledgeDirectoryService knowledgeDirectoryService;
+
+    @Autowired
+    private KnowledgeService knowledgeService;
 
     public JsonResult<Object> getComplexEventById(Long complexEventId) {
         if (ObjectUtils.isEmpty(complexEventId)) {
@@ -395,6 +406,86 @@ public class ComplexEventService {
     public JsonResult<Object> addFolumaKnowledge(FolumaKnowledge knowledgeFoluma) {
         FolumaKnowledge save = knowledgeFolumaRepository.save(knowledgeFoluma);
         return new JsonResult<>(save);
+    }
+
+    public JsonResult<Object> saveKnowledgeByRange(String field, String department, String metaDir, String s, String p, String o) {
+        if (!((StringUtils.isEmpty(s) && StringUtils.isEmpty(p) && StringUtils.isEmpty(o))
+            || (StringUtils.isEmpty(o) && p.equals("?"))
+            || (StringUtils.isEmpty(s) && o.equals("?")))) {
+            return new JsonResult<>(ResponseCode.PARAM_ILLAGLE_OR_NULL);
+        }
+        String sql = null;
+        if (StringUtils.isEmpty(s) && StringUtils.isEmpty(p) && StringUtils.isEmpty(o)) {
+            sql = null;
+        }else if (StringUtils.isEmpty(s)) {
+            sql = "model1|SELECT ?s\n" +
+                "WHERE {\n" +
+                "    ?s "+ p + " " + o +".\n" +
+                "}";
+        } else {
+            sql = "model1|SELECT ?p\n" +
+                "WHERE {\n" +
+                "    " + s + " "+ p + " ?o.\n"+
+                "}";
+        }
+        JsonResult<Object> knowledgeBySparql = knowledgeService.getKnowledgeBySparql(sql);
+        List<KnowledgeKnowledge> data = (List<KnowledgeKnowledge>) knowledgeBySparql.getData();
+        if (data.size() == 0) return new JsonResult<>(data);
+
+        Map<Long, KnowledgeKnowledge> dirNodeIdWithKnowledge = data.stream()
+            .collect(Collectors.toMap(KnowledgeKnowledge::getDirNodeId, Function.identity()));
+
+        List<DirectoryNode> allDataNodes = (List<DirectoryNode>) knowledgeDirectoryService.getDirectoryNodeWithIDs(
+            data.stream().map(KnowledgeKnowledge::getDirNodeId).collect(Collectors.toList())).getData();
+
+
+
+        List<DirectoryNode> nodes = new ArrayList<>();
+        if (!StringUtils.isEmpty(field)) {
+            nodes = (List<DirectoryNode>)knowledgeDirectoryService.getDirectoryNodeWithName(field).getData();
+        }
+
+        if (!StringUtils.isEmpty(department)) {
+            List<DirectoryNode> departments = (List<DirectoryNode>)knowledgeDirectoryService.getDirectoryNodeWithName(department).getData();
+            nodes = checkChilds(nodes, departments);
+        }
+
+        if (!StringUtils.isEmpty(metaDir)) {
+            List<DirectoryNode> metaDirs = (List<DirectoryNode>)knowledgeDirectoryService.getDirectoryNodeWithName(metaDir).getData();
+            nodes = checkChilds(nodes, metaDirs);
+        }
+
+        allDataNodes = checkChilds(nodes, allDataNodes);
+
+        List<KnowledgeKnowledge> ret = new ArrayList<>();
+        for (DirectoryNode allDataNode : allDataNodes) {
+            ret.add(dirNodeIdWithKnowledge.get(allDataNode));
+        }
+        return new JsonResult<>(ret);
+    }
+
+    private List<DirectoryNode> checkChilds(List<DirectoryNode> parents, List<DirectoryNode> childs) {
+        if (CollectionUtils.isEmpty(parents)) {
+            return childs;
+        }
+        if (CollectionUtils.isEmpty(childs)) {
+            return parents;
+        }
+        Map<Long, DirectoryNode> directoryNodeMap = parents.stream().collect(Collectors.toMap(DirectoryNode::getId, Function.identity()));
+        List<DirectoryNode> ret = new ArrayList<>();
+        for (DirectoryNode node : childs) {
+            DirectoryNode tmp = node;
+            while (tmp != null) {
+                if (tmp.getValue().equals("root")) break;
+                tmp = (DirectoryNode) knowledgeDirectoryService.getDirectoryNodeWithID(tmp.getParentId()).getData();
+                if (directoryNodeMap.containsKey(tmp.getId())) {
+                    ret.add(node);
+                }
+            }
+        }
+        System.out.println(ret.size());
+        System.out.println(JSONObject.toJSONString(ret));
+        return ret;
     }
     /**
      * 获取所有原子事件

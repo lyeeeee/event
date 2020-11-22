@@ -67,36 +67,34 @@ public class DirectoryManagementService {
         return directoryManagementRepository.findNameByType(type);
     }
 
-    public List<Map<String, Object>> getSelect(){
+    public List<Map<String, Object>> getSelect() {
         List<Map<String, Object>> fieldList = directoryManagementRepository.findNameByType("01");
         List<Map<String, Object>> departmentList = directoryManagementRepository.findDepartment();
 
         List<Map<String, Object>> resultList = new ArrayList<>();
 
-        for (Map<String, Object> fieldMap:fieldList) {
+        for (Map<String, Object> fieldMap : fieldList) {
             List<Map<String, Object>> list = new ArrayList<>();
             Map<String, Object> resultMap = new HashMap<>();
 
-            for (Map<String, Object> departmentMap:departmentList) {
+            for (Map<String, Object> departmentMap : departmentList) {
                 Map<String, Object> map = new HashMap<>();
 
-                if (fieldMap.get("value").toString().equals(departmentMap.get("parent_id").toString())){
-                    map.put("value",departmentMap.get("value"));
-                    map.put("label",departmentMap.get("label"));
-                    map.put("isLeaf",true);
+                if (fieldMap.get("value").toString().equals(departmentMap.get("parent_id").toString())) {
+                    map.put("value", departmentMap.get("value"));
+                    map.put("label", departmentMap.get("label"));
+                    map.put("isLeaf", true);
                     list.add(map);
                 }
             }
-            if(list == null || list.size() < 1){//领域下无部门则不添加进级联选择
+            if (list == null || list.size() < 1) {//领域下无部门则不添加进级联选择
                 continue;
             }
-            resultMap.put("value",fieldMap.get("value"));
-            resultMap.put("label",fieldMap.get("label"));
-            resultMap.put("children",list);
+            resultMap.put("value", fieldMap.get("value"));
+            resultMap.put("label", fieldMap.get("label"));
+            resultMap.put("children", list);
             resultList.add(resultMap);
         }
         return resultList;
     }
-
-
 }

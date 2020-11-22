@@ -10,7 +10,7 @@ import javax.persistence.*;
  */
 
 @Entity
-@Table(name = "knowledge_foluma")
+@Table(name = "knowledge_fomula")
 public class FolumaKnowledge {
     private static final long serialVersionUID = 1L;
 
@@ -22,7 +22,7 @@ public class FolumaKnowledge {
      * 公式名称
      */
     @Column(name = "name", nullable = false)
-    private String name;
+    private String fomulaName;
 
     /**
      * 是否是全局的
@@ -40,7 +40,7 @@ public class FolumaKnowledge {
      * 公式内容
      */
     @Column(name = "content")
-    private String content;
+    private String foluma;
     /**
      * 公式变量对应具体知识
      */
@@ -55,12 +55,12 @@ public class FolumaKnowledge {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFomulaName() {
+        return fomulaName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFomulaName(String name) {
+        this.fomulaName = name;
     }
 
     public Integer getIsGlobal() {
@@ -79,12 +79,12 @@ public class FolumaKnowledge {
         this.isComplete = isComplete;
     }
 
-    public String getContent() {
-        return content;
+    public String getFoluma() {
+        return foluma;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setFoluma(String content) {
+        this.foluma = content;
     }
 
     public String getRelation() {

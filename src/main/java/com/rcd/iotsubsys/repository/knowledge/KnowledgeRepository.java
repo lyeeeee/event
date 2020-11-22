@@ -14,6 +14,7 @@ import java.util.List;
 public interface KnowledgeRepository extends JpaRepository<KnowledgeKnowledge, Long> {
 
     KnowledgeKnowledge getKnowledgeKnowledgeByDirNodeId(Long id);
+    KnowledgeKnowledge getKnowledgeKnowledgeByKnowledgeUri(String url);
     void deleteAllByModelName(String modelName);
     List<KnowledgeKnowledge> findAllByIdIn(List<Long> ids);
     List<KnowledgeKnowledge> getKnowledgeKnowledgeByModelName(String modelName);

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -80,6 +81,15 @@ public class KnowledgeService {
         KnowledgeMetaEvent metaEvent = metaEventRepository.getOne(id);
         System.out.println(metaEvent.getKnowledgeId());
         KnowledgeKnowledge knowledge = knowledgeRepository.getOne(metaEvent.getKnowledgeId());
+        long fileId = knowledge.getKnowldegeFileId();
+        KnowledgeFile file = knowledgeFileRepository.getOne(fileId);
+        List<String> knowledgeProperties = ontologyService.getKnowledgeProperties(file.getFileName(),file.getTdbModelName(), knowledge.getKnowledgeUri());
+        return new JsonResult<>(knowledgeProperties);
+    }
+
+    public JsonResult<Object> getKnowledgeProperties(String knowledgeUri) {
+
+        KnowledgeKnowledge knowledge = knowledgeRepository.getOne(Long.parseLong(knowledgeUri));
         long fileId = knowledge.getKnowldegeFileId();
         KnowledgeFile file = knowledgeFileRepository.getOne(fileId);
         List<String> knowledgeProperties = ontologyService.getKnowledgeProperties(file.getFileName(),file.getTdbModelName(), knowledge.getKnowledgeUri());
@@ -166,16 +176,24 @@ public class KnowledgeService {
     }
 
     public JsonResult<Object> getKnowledgeBySparql(String sql) {
+        if (StringUtils.isEmpty(sql)) {
+            return new JsonResult<>(knowledgeRepository.findAll());
+        }
         String modelName = sql.split("\\|")[0];
         String sqlStr = sql.split("\\|")[1];
-        ResultSet knowledge = ontologyService.getKnowledge(modelName, sqlStr);
+        ResultSet knowledge = null;
+        try {
+            knowledge = ontologyService.getKnowledge(modelName, sqlStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new JsonResult<>(new ArrayList<KnowledgeKnowledge>());
+        }
         List<KnowledgeKnowledge> knowledges = knowledgeRepository.getKnowledgeKnowledgeByModelName(modelName);
         Map<String, KnowledgeKnowledge> collect = knowledges.stream().collect(Collectors.toMap(KnowledgeKnowledge::getKnowledgeUri, Function.identity()));
         Set<String> visited = new HashSet<>();
         List<KnowledgeKnowledge> ret = new ArrayList<>();
         while (knowledge.hasNext()) {
             String s = knowledge.next().toString();
-            System.out.println(s);
             Matcher matcher = pattern.matcher(s);
             if (matcher.find()) {
                 String k = matcher.group(1);

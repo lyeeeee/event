@@ -6,16 +6,20 @@ import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.dto.response.base.ResponseCode;
 import com.rcd.iotsubsys.factory.DirectoryFactory;
 import com.rcd.iotsubsys.repository.directory.DirectoryRepository;
+import org.apache.lucene.store.Directory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -66,6 +70,22 @@ public class KnowledgeDirectoryService {
         return new JsonResult<>(node);
     }
 
+    public JsonResult<Object> getDirectoryNodeWithIDs(List<Long> ids) {
+        List<DirectoryNode> node = directoryRepository.getAllByIdIn(ids);
+        if (ObjectUtils.isEmpty(node)) {
+            return new JsonResult<>(ResponseCode.DIRECTORY_NODE_NOT_EXIST);
+        }
+        return new JsonResult<>(node);
+    }
+    public JsonResult<Object> getDirectoryNodeWithName(String nodeName) {
+        List<DirectoryNode> node = directoryRepository.getAllByValue(nodeName);
+        if (ObjectUtils.isEmpty(node)) {
+            return new JsonResult<>(ResponseCode.DIRECTORY_NODE_NOT_EXIST);
+        }
+        return new JsonResult<>(node);
+    }
+
+
     public JsonResult<Object> getAllDirectoryWithOwner(List<String> owner) {
         List<DirectoryNode> allNodes = new ArrayList<>();
         for (String s : owner) {
@@ -74,5 +94,13 @@ public class KnowledgeDirectoryService {
         LOGGER.info("get all nodes, list size:{}", allNodes.size());
         DirectoryDTO directoryDTO = DirectoryFactory.convertNodeList(allNodes);
         return new JsonResult<>(directoryDTO);
+    }
+
+    public List<DirectoryNode> getChildDirNode(String nodeName) {
+        if (StringUtils.isEmpty(nodeName)) return new ArrayList<>();
+        List<DirectoryNode> allByValue = directoryRepository.findAllByValue(nodeName);
+        Set<Long> parentIds = allByValue.stream().map(DirectoryNode::getId).collect(Collectors.toSet());
+        List<DirectoryNode> childs = directoryRepository.findAllByParentIdIn(parentIds);
+        return childs;
     }
 }

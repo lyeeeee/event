@@ -75,6 +75,12 @@ public class KnowledgeController {
         return knowledgeService.getKnowledgeProperties(metaEventId);
     }
 
+    @RequestMapping(value = "/getKnowledgePropertyByUri", method = RequestMethod.GET)
+    public JsonResult<Object> getKnowledgePropertyByUri(@RequestParam(required = false) String knowledgeUri) throws IOException {
+        LOGGER.info("getKnowledgeProperty with knowledgeUri:{}", knowledgeUri);
+        return knowledgeService.getKnowledgeProperties(knowledgeUri);
+    }
+
     @RequestMapping(value = "/getAllModel", method = RequestMethod.GET)
     public JsonResult<Object> getAllModel() throws IOException {
         LOGGER.info("getAllModel...");

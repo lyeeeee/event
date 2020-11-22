@@ -7,6 +7,7 @@ import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexSubEvnet;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexTarget;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.service.event.ComplexEventService;
+import com.rcd.iotsubsys.service.knowledge.dto.KnowledgeRangeDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,6 +156,17 @@ public class ComplexEventController {
 
     @RequestMapping(value = "/addFolumaKnowledge", method = RequestMethod.POST)
     public JsonResult<Object> addFolumaKnowledge(@RequestBody FolumaKnowledge knowledgeFoluma) {
+        LOGGER.info(JSONObject.toJSONString(knowledgeFoluma));
         return complexEventService.addFolumaKnowledge(knowledgeFoluma);
+    }
+
+    @RequestMapping(value = "/saveKnowledgeByRange", method = RequestMethod.POST)
+    public JsonResult<Object> saveKnowledgeByRange(@RequestBody(required = false)KnowledgeRangeDTO knowledgeRangeDTO) {
+        return complexEventService.saveKnowledgeByRange(knowledgeRangeDTO.getField()
+            , knowledgeRangeDTO.getDepartment()
+            , knowledgeRangeDTO.getMetaDir()
+            , knowledgeRangeDTO.getS()
+            , knowledgeRangeDTO.getP()
+            , knowledgeRangeDTO.getO());
     }
 }
