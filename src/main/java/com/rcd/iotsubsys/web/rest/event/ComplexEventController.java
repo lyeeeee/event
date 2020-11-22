@@ -1,6 +1,7 @@
 package com.rcd.iotsubsys.web.rest.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.rcd.iotsubsys.domain.event.FolumaKnowledge;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexEvent;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexSubEvnet;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexTarget;
@@ -138,5 +139,22 @@ public class ComplexEventController {
     public JsonResult<Object> getDeduceResult() {
         LOGGER.info("getDeduceResult....");
         return complexEventService.getDeduceResult();
+    }
+
+    @RequestMapping(value = "/getKnowledgeByComplexId", method = RequestMethod.GET)
+    public JsonResult<Object> getKnowledgeByComplexId(@RequestParam Long complexEventId) {
+        LOGGER.info("getKnowledgeByComplexId....");
+        return complexEventService.getKnowledgeByComplexId(complexEventId);
+    }
+
+    @RequestMapping(value = "/saveKnowledgeForEvent", method = RequestMethod.GET)
+    public JsonResult<Object> saveKnowledgeForEvent(@RequestParam Long complexEventId, @RequestParam(required = false) Long[] selectedIds) {
+        if (selectedIds == null) selectedIds = new Long[]{};
+        return complexEventService.saveKnowledgeForEvent(complexEventId, selectedIds);
+    }
+
+    @RequestMapping(value = "/addFolumaKnowledge", method = RequestMethod.POST)
+    public JsonResult<Object> addFolumaKnowledge(@RequestBody FolumaKnowledge knowledgeFoluma) {
+        return complexEventService.addFolumaKnowledge(knowledgeFoluma);
     }
 }

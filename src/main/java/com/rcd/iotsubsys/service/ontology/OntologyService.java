@@ -18,8 +18,7 @@ import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntResource;
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.util.iterator.ExtendedIterator;
@@ -212,5 +211,16 @@ public class OntologyService{
             owlResourceDataMap.remove(file.getFileName());
             LOGGER.info("remove owlResource: {}", file.getFileName());
         }
+    }
+
+    public ResultSet getKnowledge(String modelName, String sql) {
+        database.begin(ReadWrite.READ);
+        Model model = database.getNamedModel(modelName);
+        Query query = QueryFactory.create(sql);
+        QueryExecution queryExec = QueryExecutionFactory.create(query, model);
+        ResultSet results = queryExec.execSelect();
+        database.commit();
+        database.end();
+        return results;
     }
 }

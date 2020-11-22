@@ -682,11 +682,6 @@ public class Deducer implements Runnable {
         Quantifier f2quantifier1 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkFPGEq((FPExpr)context.mkApp(f2, exprx2, expry2), context.mkFP(1.0, context.mkFPSortDouble())), 1, null, null, null, null);
         Quantifier f2quantifier2 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkFPLEq((FPExpr)context.mkApp(f2, exprx2, expry2), context.mkFP(4.0, context.mkFPSortDouble())), 1, null, null, null, null);
 
-//        Quantifier f1quantifier1 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkGt((ArithExpr) context.mkApp(f1, exprx1, expry1), context.mkInt(-13)), 1, null, null, null, null);
-//        Quantifier f1quantifier2 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkLt((ArithExpr)context.mkApp(f1, exprx1, expry1), context.mkInt(-16)), 1, null, null, null, null);
-//        Quantifier f2quantifier1 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkGe((ArithExpr)context.mkApp(f2, exprx2, expry2), context.mkInt(1)), 1, null, null, null, null);
-//        Quantifier f2quantifier2 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkLe((ArithExpr)context.mkApp(f2, exprx2, expry2), context.mkInt(4)), 1, null, null, null, null);
-//
         map.put(15, f1quantifier1);
         map.put(16, f1quantifier2);
         map.put(17, f2quantifier1);
@@ -739,33 +734,6 @@ public class Deducer implements Runnable {
         BoolExpr event1 = context.mkFPEq((FPExpr) context.mkApp(f1, context.MkString("beijing"), context.mkInt(1)), context.mkFP(-17.0, context.mkFPSortDouble()));
         BoolExpr event2 = context.mkFPEq((FPExpr) context.mkApp(f2, context.MkString("beijing"), context.mkInt(2)), context.mkFP(3.0, context.mkFPSortDouble()));
 
-//        BoolExpr event1 = context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(1)), context.mkInt(-14));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(3)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(4)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(5)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(6)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(7)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(8)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(9)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(10)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(11)), context.mkInt(-14)));
-//        event1 = context.mkOr(event1, context.mkEq(context.mkApp(f1, context.MkString("beijing"), context.mkInt(12)), context.mkInt(-14)));
-//
-//
-//        BoolExpr event2 = context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(2)), context.mkInt(2));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(3)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(4)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(5)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(6)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(7)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(8)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(9)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(10)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(14)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(13)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(12)), context.mkInt(2)));
-//        event2 = context.mkOr(event2, context.mkEq(context.mkApp(f2, context.MkString("beijing"), context.mkInt(11)), context.mkInt(2)));
-
         solver.add(event1);
         solver.add(event2);
         for (BoolExpr boolExpr : solver.getAssertions()) {
@@ -773,8 +741,204 @@ public class Deducer implements Runnable {
         }
         Status check = solver.check();
         System.out.println(check);
-        String property = System.getProperty("java.library.path");
-        System.out.println(property);
+
+        System.out.println("===============================================");
+
+        testEventLogic2();
     }
 
+    private static void testEventLogic() {
+        Context context = new Context();
+        Sort stringSort = context.mkStringSort();
+        Sort intSort = context.mkIntSort();
+        Sort doubleSort = context.mkFPSortDouble();
+
+        String s = "((17)&(18))&((15)|(16))";
+        s = '(' + s + ')';
+        Map<Integer, BoolExpr> map = new HashMap<>();
+
+        // 属性名(location, 时间戳) = 属性值
+        FuncDecl f1 = context.mkFuncDecl("http://www.w3.org/ns/sosa/光频_输入功率", new Sort[]{stringSort, intSort}, doubleSort);
+        FuncDecl f2 = context.mkFuncDecl("http://www.w3.org/ns/sosa/光频_输出功率", new Sort[]{stringSort, intSort}, doubleSort);
+
+
+        Expr exprx1 = context.mkConst("x1", stringSort);
+        Expr expry1 = context.mkConst("y1", intSort);
+        Expr exprx2 = context.mkConst("x2", stringSort);
+        Expr expry2 = context.mkConst("y2", intSort);
+
+
+        Quantifier f1quantifier1 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkFPGt((FPExpr) context.mkApp(f1, exprx1, expry1), context.mkFP(-13.0, context.mkFPSortDouble())), 0, null, null, null, null);
+        Quantifier f1quantifier2 = context.mkForall(new Expr[]{exprx1, expry1}, context.mkFPLt((FPExpr) context.mkApp(f1, exprx1, expry1), context.mkFP(-16.0, context.mkFPSortDouble())), 0, null, null, null, null);
+        Quantifier f2quantifier1 = context.mkForall(new Expr[]{exprx2, expry2}, context.mkFPGEq((FPExpr)context.mkApp(f2, exprx2, expry2), context.mkFP(1.0, context.mkFPSortDouble())), 0, null, null, null, null);
+        Quantifier f2quantifier2 = context.mkForall(new Expr[]{exprx2, expry2}, context.mkFPLEq((FPExpr)context.mkApp(f2, exprx2, expry2), context.mkFP(4.0, context.mkFPSortDouble())), 0, null, null, null, null);
+
+        map.put(15, f1quantifier1);
+        map.put(16, f1quantifier2);
+        map.put(17, f2quantifier1);
+        map.put(18, f2quantifier2);
+
+
+        char[] arr = s.toCharArray();
+        Stack<Character> cStack = new Stack<>();
+        Stack<BoolExpr> exprStack = new Stack<>();
+        for (char c : arr) {
+            if (c == ')') {
+                String tmp = "";
+                while (cStack.peek() != '(') {
+                    tmp = cStack.pop() + tmp;
+                }
+                cStack.pop();
+                if (tmp.contains("&")) {
+                    Integer left = Integer.parseInt(tmp.split("&")[0]);
+                    Integer right = Integer.parseInt(tmp.split("&")[0]);
+                    BoolExpr boolExpr = context.mkAnd(exprStack.pop(), exprStack.pop());
+                    String newNum = left + "" + right;
+                    map.put(Integer.parseInt(newNum), boolExpr);
+                    exprStack.push(boolExpr);
+                    for (char i : newNum.toCharArray()) {
+                        cStack.push(i);
+                    }
+                } else if(tmp.contains("|")) {
+                    Integer left = Integer.parseInt(tmp.split("\\|")[0]);
+                    Integer right = Integer.parseInt(tmp.split("\\|")[0]);
+                    BoolExpr boolExpr = context.mkOr(exprStack.pop(), exprStack.pop());
+                    String newNum = left + "" + right;
+                    map.put(Integer.parseInt(newNum), boolExpr);
+                    exprStack.push(boolExpr);
+                    for (char i : newNum.toCharArray()) {
+                        cStack.push(i);
+                    }
+                } else {
+                    for (char i : tmp.toCharArray()) {
+                        cStack.push(i);
+                    }
+                    exprStack.push(map.get(Integer.parseInt(tmp)));
+                }
+            } else {
+                cStack.push(c);
+            }
+        }
+        BoolExpr expr = exprStack.pop();
+        Solver solver = context.mkSolver();
+
+        solver.add(context.mkNot(expr));
+        BoolExpr event1 = context.mkFPEq((FPExpr) context.mkApp(f1, context.MkString("beijing"), context.mkInt(1)), context.mkFP(-14.0, context.mkFPSortDouble()));
+        BoolExpr event2 = context.mkFPEq((FPExpr) context.mkApp(f2, context.MkString("beijing"), context.mkInt(2)), context.mkFP(3.0, context.mkFPSortDouble()));
+        BoolExpr event3 = context.mkFPEq((FPExpr) context.mkApp(f1, context.MkString("beijing"), context.mkInt(3)), context.mkFP(-14.0, context.mkFPSortDouble()));
+        BoolExpr event4 = context.mkFPEq((FPExpr) context.mkApp(f2, context.MkString("beijing"), context.mkInt(4)), context.mkFP(3.0, context.mkFPSortDouble()));
+
+
+        solver.add(event1);
+        solver.add(event2);
+        solver.add(event3);
+        solver.add(event4);
+        for (BoolExpr boolExpr : solver.getAssertions()) {
+            System.out.println(boolExpr);
+        }
+        Status check = solver.check();
+        System.out.println(check);
+        System.out.println(solver.getModel());
+    }
+
+
+    private static void testEventLogic2() {
+        Context context = new Context();
+        Sort stringSort = context.mkStringSort();
+        Sort intSort = context.mkIntSort();
+        Sort doubleSort = context.mkFPSortDouble();
+
+        String s = "((17)&(18))&((15)|(16))";
+        s = '(' + s + ')';
+        Map<Integer, BoolExpr> map = new HashMap<>();
+
+        // 属性名(location, 时间戳) = 属性值
+        FuncDecl f1 = context.mkFuncDecl("http://www.w3.org/ns/sosa/光频_输入功率", new Sort[]{stringSort, intSort}, doubleSort);
+        FuncDecl f2 = context.mkFuncDecl("http://www.w3.org/ns/sosa/光频_输出功率", new Sort[]{stringSort, intSort}, doubleSort);
+
+
+        Expr exprx1 = context.mkConst("x1", stringSort);
+        Expr expry1 = context.mkConst("y1", intSort);
+        Expr exprx2 = context.mkConst("x2", stringSort);
+        Expr expry2 = context.mkConst("y2", intSort);
+
+        BoolExpr f1BoolExpr1 = context.mkFPGt((FPExpr) context.mkApp(f1, exprx1, expry1), context.mkFP(-13.0, context.mkFPSortDouble()));
+        BoolExpr f1BoolExpr2 = context.mkFPLt((FPExpr) context.mkApp(f1, exprx1, expry1), context.mkFP(-16.0, context.mkFPSortDouble()));
+        BoolExpr f2BoolExpr1 = context.mkFPGEq((FPExpr)context.mkApp(f2, exprx2, expry2), context.mkFP(1.0, context.mkFPSortDouble()));
+        BoolExpr f2BoolExpr2 = context.mkFPLEq((FPExpr)context.mkApp(f2, exprx2, expry2), context.mkFP(4.0, context.mkFPSortDouble()));
+
+        map.put(15, f1BoolExpr1);
+        map.put(16, f1BoolExpr2);
+        map.put(17, f2BoolExpr1);
+        map.put(18, f2BoolExpr2);
+
+
+        char[] arr = s.toCharArray();
+        Stack<Character> cStack = new Stack<>();
+        Stack<BoolExpr> exprStack = new Stack<>();
+        for (char c : arr) {
+            if (c == ')') {
+                String tmp = "";
+                while (cStack.peek() != '(') {
+                    tmp = cStack.pop() + tmp;
+                }
+                cStack.pop();
+                if (tmp.contains("&")) {
+                    Integer left = Integer.parseInt(tmp.split("&")[0]);
+                    Integer right = Integer.parseInt(tmp.split("&")[0]);
+                    BoolExpr boolExpr = context.mkAnd(exprStack.pop(), exprStack.pop());
+                    String newNum = left + "" + right;
+                    map.put(Integer.parseInt(newNum), boolExpr);
+                    exprStack.push(boolExpr);
+                    for (char i : newNum.toCharArray()) {
+                        cStack.push(i);
+                    }
+                } else if(tmp.contains("|")) {
+                    Integer left = Integer.parseInt(tmp.split("\\|")[0]);
+                    Integer right = Integer.parseInt(tmp.split("\\|")[0]);
+                    BoolExpr boolExpr = context.mkOr(exprStack.pop(), exprStack.pop());
+                    String newNum = left + "" + right;
+                    map.put(Integer.parseInt(newNum), boolExpr);
+                    exprStack.push(boolExpr);
+                    for (char i : newNum.toCharArray()) {
+                        cStack.push(i);
+                    }
+                } else {
+                    for (char i : tmp.toCharArray()) {
+                        cStack.push(i);
+                    }
+                    exprStack.push(map.get(Integer.parseInt(tmp)));
+                }
+            } else {
+                cStack.push(c);
+            }
+        }
+        BoolExpr expr = exprStack.pop();
+        expr = context.mkNot(expr);
+        expr = context.mkForall(new Expr[]{exprx1, expry1, exprx2, expry2}, expr, 0, null, null, null, null);
+        Solver solver = context.mkSolver();
+
+        solver.add(expr);
+        BoolExpr event1 = context.mkFPEq((FPExpr) context.mkApp(f1, context.MkString("beijing"), context.mkInt(1)), context.mkFP(-14.0, context.mkFPSortDouble()));
+        BoolExpr event2 = context.mkFPEq((FPExpr) context.mkApp(f2, context.MkString("beijing"), context.mkInt(2)), context.mkFP(3.0, context.mkFPSortDouble()));
+        BoolExpr event3 = context.mkFPEq((FPExpr) context.mkApp(f1, context.MkString("beijing"), context.mkInt(3)), context.mkFP(-14.0, context.mkFPSortDouble()));
+        BoolExpr event4 = context.mkFPEq((FPExpr) context.mkApp(f2, context.MkString("beijing"), context.mkInt(4)), context.mkFP(3.0, context.mkFPSortDouble()));
+
+        //expr = context.mkAnd(expr, event1, event2, event3, event4);
+        solver.add(event1);
+        solver.add(event2);
+        solver.add(event3);
+        solver.add(event4);
+        // solver.add(expr);
+        for (BoolExpr boolExpr : solver.getAssertions()) {
+            System.out.println(boolExpr);
+        }
+        Status check = solver.check();
+        if (check == Status.UNSATISFIABLE) {
+            System.out.println("复杂事件发生");
+        } else {
+            System.out.println("复杂事件没有发生");
+        }
+        System.out.println(solver.getModel());
+    }
 }

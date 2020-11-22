@@ -144,4 +144,8 @@ public class KnowledgeKnowledge implements Serializable {
     public void setDirNodeId(Long dirNodeId) {
         this.dirNodeId = dirNodeId;
     }
+
+    public static void main(String[] args) {
+
+    }
 }

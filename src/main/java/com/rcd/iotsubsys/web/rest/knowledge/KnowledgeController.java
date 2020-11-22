@@ -87,6 +87,17 @@ public class KnowledgeController {
         return knowledgeService.deleteModel(fileId);
     }
 
+    @RequestMapping(value = "/getKnowledgeBySparql", method = RequestMethod.GET)
+    public JsonResult<Object> getKnowledgeBySparql(String sql) throws IOException {
+        LOGGER.info("getKnowledgeBySparql with param:{}", sql);
+        return knowledgeService.getKnowledgeBySparql(sql);
+    }
+
+    @RequestMapping(value = "/getAllKnowledgeKnowledge", method = RequestMethod.GET)
+    public JsonResult<Object> getAllKnowledgeKnowledge() throws IOException {
+        return knowledgeService.getAllKnowledgeKnowledge();
+    }
+
     public static void main(String[] args) throws FileNotFoundException {
         //创建dataset和model
 //        Dataset dataset = TDBFactory.createDataset("dbData");

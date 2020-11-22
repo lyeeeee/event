@@ -1,16 +1,19 @@
 package com.rcd.iotsubsys.service.event;
 
+import com.rcd.iotsubsys.domain.event.FolumaKnowledge;
 import com.rcd.iotsubsys.domain.knowledge.*;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.dto.response.base.ResponseCode;
 import com.rcd.iotsubsys.repository.event.*;
+import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.deduce.DeduceContext;
+import com.rcd.iotsubsys.service.knowledge.KnowledgeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import springfox.documentation.spring.web.json.Json;
+import sun.security.util.AuthResources_ko;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,6 +46,15 @@ public class ComplexEventService {
 
     @Autowired
     private KnowledgeComplexTargetRelationRepository knowledgeComplexTargetRelationRepository;
+
+    @Autowired
+    private ComplexEventKnowledgeRepository complexEventKnowledgeRepository;
+
+    @Autowired
+    private KnowledgeRepository knowledgeRepository;
+
+    @Autowired
+    private KnowledgeFolumaRepository knowledgeFolumaRepository;
 
     @Autowired
     private DeduceContext deduceContext;
@@ -355,6 +367,34 @@ public class ComplexEventService {
             result.add(complexEvent);
         }
         return new JsonResult<>(result);
+    }
+
+    public JsonResult<Object> getKnowledgeByComplexId(Long complexEventID) {
+        List<SelectedKnowledge> knowledges = complexEventKnowledgeRepository.findAllByComplexId(complexEventID);
+        List<Long> ids = new ArrayList<>();
+        for (SelectedKnowledge knowledge : knowledges) {
+            ids.add(knowledge.getKnowledgeId());
+        }
+        return new JsonResult<>(knowledgeRepository.findAllByIdIn(ids));
+    }
+
+    @Transactional
+    public JsonResult<Object> saveKnowledgeForEvent(Long complexEventId, Long[] selectedIds) {
+        complexEventKnowledgeRepository.removeAllByComplexId(complexEventId);
+        List<SelectedKnowledge> list = new ArrayList<>();
+        for (Long i : selectedIds) {
+            SelectedKnowledge knowledge = new SelectedKnowledge();
+            knowledge.setComplexId(complexEventId);
+            knowledge.setKnowledgeId(i);
+            list.add(knowledge);
+        }
+        complexEventKnowledgeRepository.saveAll(list);
+        return new JsonResult<>();
+    }
+
+    public JsonResult<Object> addFolumaKnowledge(FolumaKnowledge knowledgeFoluma) {
+        FolumaKnowledge save = knowledgeFolumaRepository.save(knowledgeFoluma);
+        return new JsonResult<>(save);
     }
     /**
      * 获取所有原子事件

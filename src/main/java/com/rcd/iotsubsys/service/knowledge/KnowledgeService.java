@@ -13,6 +13,8 @@ import com.rcd.iotsubsys.repository.event.MetaEventRepository;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeFileRepository;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.ontology.OntologyService;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -46,6 +51,8 @@ public class KnowledgeService {
 
     @Autowired
     private DirectoryRepository directoryRepository;
+
+    private static Pattern pattern = Pattern.compile("<(.+)>");
 
     public JsonResult<Object> checkUploadKnowledge(Map<String, Object> map) throws IOException {
         String name = (String) map.get("name");
@@ -156,5 +163,32 @@ public class KnowledgeService {
         // 删除文件记录
         knowledgeFileRepository.deleteById(fileId);
         return new JsonResult<>();
+    }
+
+    public JsonResult<Object> getKnowledgeBySparql(String sql) {
+        String modelName = sql.split("\\|")[0];
+        String sqlStr = sql.split("\\|")[1];
+        ResultSet knowledge = ontologyService.getKnowledge(modelName, sqlStr);
+        List<KnowledgeKnowledge> knowledges = knowledgeRepository.getKnowledgeKnowledgeByModelName(modelName);
+        Map<String, KnowledgeKnowledge> collect = knowledges.stream().collect(Collectors.toMap(KnowledgeKnowledge::getKnowledgeUri, Function.identity()));
+        Set<String> visited = new HashSet<>();
+        List<KnowledgeKnowledge> ret = new ArrayList<>();
+        while (knowledge.hasNext()) {
+            String s = knowledge.next().toString();
+            System.out.println(s);
+            Matcher matcher = pattern.matcher(s);
+            if (matcher.find()) {
+                String k = matcher.group(1);
+                if (collect.containsKey(k) && !visited.contains(k)) {
+                    ret.add(collect.get(k));
+                    visited.add(k);
+                }
+            }
+        }
+        return new JsonResult<>(ret);
+    }
+
+    public JsonResult<Object> getAllKnowledgeKnowledge() {
+        return new JsonResult<>(this.knowledgeRepository.findAll());
     }
 }
