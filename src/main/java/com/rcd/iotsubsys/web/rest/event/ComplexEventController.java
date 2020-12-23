@@ -162,11 +162,17 @@ public class ComplexEventController {
 
     @RequestMapping(value = "/saveKnowledgeByRange", method = RequestMethod.POST)
     public JsonResult<Object> saveKnowledgeByRange(@RequestBody(required = false)KnowledgeRangeDTO knowledgeRangeDTO) {
-        return complexEventService.saveKnowledgeByRange(knowledgeRangeDTO.getField()
+        return complexEventService.saveKnowledgeByRange(knowledgeRangeDTO.getComplexId()
+            , knowledgeRangeDTO.getField()
             , knowledgeRangeDTO.getDepartment()
             , knowledgeRangeDTO.getMetaDir()
             , knowledgeRangeDTO.getS()
             , knowledgeRangeDTO.getP()
             , knowledgeRangeDTO.getO());
+    }
+
+    @RequestMapping(value = "/getFomulaByType", method = RequestMethod.GET)
+    public JsonResult<Object> getFomulaByType(@RequestParam Integer type) {
+        return complexEventService.getFomulaByType(type);
     }
 }

@@ -191,6 +191,9 @@ public class OntologyService{
         List<String> ret = new ArrayList<>();
         Map<String, OwlClass> classMap = owlResourceData.classMap;
         OwlClass owlClass = classMap.get(knowledgeUri);
+        if (owlClass == null) {
+            owlClass = owlResourceData.objMap.get(knowledgeUri).type;
+        }
         Map<String, equivalent_class> equivalentClass = owlClass.equivalentClass;
         equivalentClass.forEach((k, v) -> {
             String propertyUri = v.ValuesFrom;

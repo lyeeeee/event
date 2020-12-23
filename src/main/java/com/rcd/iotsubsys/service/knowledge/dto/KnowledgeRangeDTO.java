@@ -7,12 +7,21 @@ package com.rcd.iotsubsys.service.knowledge.dto;
  * @create: 2020-11-22 21:26
  */
 public class KnowledgeRangeDTO {
+    private Long complexId;
     private String field;
     private String department;
     private String metaDir;
     private String s;
     private String p;
     private String o;
+
+    public Long getComplexId() {
+        return complexId;
+    }
+
+    public void setComplexId(Long complexId) {
+        this.complexId = complexId;
+    }
 
     public String getField() {
         return field;

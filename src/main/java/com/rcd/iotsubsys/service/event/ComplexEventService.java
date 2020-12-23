@@ -21,6 +21,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import sun.security.util.AuthResources_ko;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -408,7 +409,7 @@ public class ComplexEventService {
         return new JsonResult<>(save);
     }
 
-    public JsonResult<Object> saveKnowledgeByRange(String field, String department, String metaDir, String s, String p, String o) {
+    public JsonResult<Object> saveKnowledgeByRange(Long complexId, String field, String department, String metaDir, String s, String p, String o) {
         if (!((StringUtils.isEmpty(s) && StringUtils.isEmpty(p) && StringUtils.isEmpty(o))
             || (StringUtils.isEmpty(o) && p.equals("?"))
             || (StringUtils.isEmpty(s) && o.equals("?")))) {
@@ -459,9 +460,21 @@ public class ComplexEventService {
 
         List<KnowledgeKnowledge> ret = new ArrayList<>();
         for (DirectoryNode allDataNode : allDataNodes) {
-            ret.add(dirNodeIdWithKnowledge.get(allDataNode));
+            ret.add(dirNodeIdWithKnowledge.get(allDataNode.getId()));
         }
-        return new JsonResult<>(ret);
+
+        List<SelectedKnowledge> selectedKnowledges = new ArrayList<>();
+
+        ret.forEach(k -> {
+            SelectedKnowledge tmp = new SelectedKnowledge();
+            tmp.setComplexId(complexId);
+
+            tmp.setKnowledgeId(k.getId());
+            selectedKnowledges.add(tmp);});
+
+        complexEventKnowledgeRepository.removeAllByComplexId(complexId);
+        complexEventKnowledgeRepository.saveAll(selectedKnowledges);
+        return new JsonResult<>();
     }
 
     private List<DirectoryNode> checkChilds(List<DirectoryNode> parents, List<DirectoryNode> childs) {
@@ -486,6 +499,11 @@ public class ComplexEventService {
         System.out.println(ret.size());
         System.out.println(JSONObject.toJSONString(ret));
         return ret;
+    }
+
+    public JsonResult<Object> getFomulaByType(Integer type) {
+        List<FolumaKnowledge> allByIsComplete = this.knowledgeFolumaRepository.getAllByIsComplete(type);
+        return new JsonResult<>(allByIsComplete);
     }
     /**
      * 获取所有原子事件
