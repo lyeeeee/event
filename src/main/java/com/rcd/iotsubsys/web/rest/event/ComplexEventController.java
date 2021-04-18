@@ -5,6 +5,7 @@ import com.rcd.iotsubsys.domain.event.FolumaKnowledge;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexEvent;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexSubEvnet;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexTarget;
+import com.rcd.iotsubsys.domain.knowledge.KnowledgeSelectedFormula;
 import com.rcd.iotsubsys.dto.response.JsonResult;
 import com.rcd.iotsubsys.service.event.ComplexEventService;
 import com.rcd.iotsubsys.service.knowledge.dto.KnowledgeRangeDTO;
@@ -174,5 +175,19 @@ public class ComplexEventController {
     @RequestMapping(value = "/getFomulaByType", method = RequestMethod.GET)
     public JsonResult<Object> getFomulaByType(@RequestParam Integer type) {
         return complexEventService.getFomulaByType(type);
+    }
+
+    @RequestMapping(value = "/getFomulaByComplexId", method = RequestMethod.GET)
+    public JsonResult<Object> getFomulaByComplexId(@RequestParam Long complexId) {
+        return complexEventService.getFomulaByComplexId(complexId);
+    }
+    @RequestMapping(value = "/addSelectedFoluma", method = RequestMethod.POST)
+    public JsonResult<Object> addSelectedFoluma(@RequestBody(required = false) KnowledgeSelectedFormula knowledgeSelectedFormula) {
+        return complexEventService.addSelectedFoluma(knowledgeSelectedFormula);
+    }
+
+    @RequestMapping(value = "/getAllAlarm", method = RequestMethod.GET)
+    public JsonResult<Object> getAllAlarm(String complexEvent) {
+        return complexEventService.getAllAlarm(complexEvent);
     }
 }

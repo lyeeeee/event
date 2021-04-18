@@ -34,22 +34,23 @@ public class CasePublish {
     <layer-1 name="device_failure_check"/>
     <layer-1 name="device_failure_system"/>
     <layer-1 name="device_failure_result"/>
+    30 -10
      */
     public static void main(String[] args) throws InterruptedException {
 		//CasePublish构造参数 param 1:wsn地址 param 2:发布地址 param 3:发布主题名
         String msg1 = "<resource><tableName>telemetry</tableName><siteName>西安</siteName>" +
             "<deviceName>EDFA设备</deviceName><dataName>输入光功率</dataName></resource>" +
-            "<value><detected_value>3</detected_value><type>float</type>" +
+            "<value><detected_value>0</detected_value><type>float</type>" +
             "<timestamp>2020/05/16 21:53:18.292</timestamp></value>";
 
         String msg2 = "<resource><tableName>telemetry</tableName><siteName>西安</siteName>" +
             "<deviceName>EDFA设备</deviceName><dataName>输出光功率</dataName></resource>" +
-            "<value><detected_value>-10</detected_value><type>float</type>" +
+            "<value><detected_value>3</detected_value><type>float</type>" +
             "<timestamp>2020/05/16 21:53:18.292</timestamp></value>";
 
         String msg3 = "<resource><tableName>telemetry</tableName><siteName>西安</siteName>" +
-            "<deviceName>光频发送设备</deviceName><dataName>拍频信号</dataName></resource>" +
-            "<value><detected_value>5</detected_value><type>float</type>" +
+            "<deviceName>参考腔稳频激光器单元</deviceName><dataName>光频透射峰电压</dataName></resource>" +
+            "<value><detected_value>1</detected_value><type>float</type>" +
             "<timestamp>2020/05/16 21:53:18.292</timestamp></value>";
 
         CasePublish pub = new CasePublish(wsnAddr,sendAddr, "data");

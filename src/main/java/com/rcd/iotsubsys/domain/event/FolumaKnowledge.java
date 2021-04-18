@@ -1,5 +1,7 @@
 package com.rcd.iotsubsys.domain.event;
 
+import org.hibernate.annotations.Proxy;
+
 import javax.persistence.*;
 
 /**
@@ -11,6 +13,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "knowledge_fomula")
+@Proxy(lazy = false)
 public class FolumaKnowledge {
     private static final long serialVersionUID = 1L;
 

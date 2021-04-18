@@ -10,18 +10,14 @@ import com.rcd.iotsubsys.repository.event.*;
 import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.deduce.DeduceContext;
 import com.rcd.iotsubsys.service.directory.KnowledgeDirectoryService;
-import com.rcd.iotsubsys.service.knowledge.DirectoryManagementService;
 import com.rcd.iotsubsys.service.knowledge.KnowledgeService;
-import org.apache.lucene.store.Directory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import sun.security.util.AuthResources_ko;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,6 +66,12 @@ public class ComplexEventService {
 
     @Autowired
     private KnowledgeService knowledgeService;
+
+    @Autowired
+    private KnowledgeSelectedFormulaRepository knowledgeSelectedFormulaRepository;
+
+    @Autowired
+    private KnowledgeComplexEventAlarmRepository knowledgeComplexEventAlarmRepository;
 
     public JsonResult<Object> getComplexEventById(Long complexEventId) {
         if (ObjectUtils.isEmpty(complexEventId)) {
@@ -505,15 +507,56 @@ public class ComplexEventService {
         List<FolumaKnowledge> allByIsComplete = this.knowledgeFolumaRepository.getAllByIsComplete(type);
         return new JsonResult<>(allByIsComplete);
     }
-    /**
-     * 获取所有原子事件
-     * */
-//    public JsonResult<Object> getAllMetaEvent(Long complexEventId) {
-//        if (ObjectUtils.isEmpty(complexEventId)) {
-//            return new JsonResult<>(ResponseCode.PARAM_ILLAGLE_OR_NULL);
-//        }
-//        List<KnowledgeComplexSubEvnet> allByComplexEventId = knowledgeComplexSubEventRepository.getAllByComplexEventId(complexEventId);
-//        List<Long> metaEventIds = allByComplexEventId.stream().map(event -> event.getSubeventId()).collect(Collectors.toList());
-//
-//    }
+
+    public JsonResult<Object> addSelectedFoluma(KnowledgeSelectedFormula knowledgeSelectedFormula) {
+        this.knowledgeSelectedFormulaRepository.save(knowledgeSelectedFormula);
+
+        List<Long> formulaIds = this.knowledgeSelectedFormulaRepository
+            .getAllByComplexId(knowledgeSelectedFormula.getComplexId())
+            .stream()
+            .map(KnowledgeSelectedFormula::getFormulaId)
+            .collect(Collectors.toList());
+        return new JsonResult<>(this.knowledgeFolumaRepository.getAllByIdIn(formulaIds));
+    }
+
+    public JsonResult<Object> getFomulaByComplexId(Long complexId) {
+        List<Long> formulaIds = this.knowledgeSelectedFormulaRepository
+            .getAllByComplexId(complexId)
+            .stream()
+            .map(KnowledgeSelectedFormula::getFormulaId)
+            .collect(Collectors.toList());
+        return new JsonResult<>(this.knowledgeFolumaRepository.getAllByIdIn(formulaIds));
+    }
+
+    public JsonResult<Object> getFomulaSelectedByComplexId(Long complexId) {
+        List<KnowledgeSelectedFormula> allSelctedFormula = this.knowledgeSelectedFormulaRepository.getAllByComplexId(complexId);
+        List<Object[]> ret = new ArrayList<>();
+        for (KnowledgeSelectedFormula k : allSelctedFormula) {
+            System.out.println(k.getFormulaId());
+            FolumaKnowledge fk = this.knowledgeFolumaRepository.getOne(k.getFormulaId());
+            System.out.println(JSONObject.toJSONString(fk));
+            Object[] tmp = new Object[2];
+            tmp[0] = k;
+            tmp[1] = fk;
+            ret.add(tmp);
+        }
+        return new JsonResult<>(ret);
+    }
+
+    public JsonResult<Object> getAllAlarm(String complexEvent) {
+        if (ObjectUtils.isEmpty(complexEvent)) {
+            return new JsonResult<>(knowledgeComplexEventAlarmRepository.findAll());
+        } else {
+            return new JsonResult<>(knowledgeComplexEventAlarmRepository.getAllByComplexEvent(complexEvent));
+        }
+    }
+
+    public void saveAlarm(KnowledgeComplexEvent data) {
+        KnowledgeComplexEventAlarm alarm = new KnowledgeComplexEventAlarm();
+        alarm.setComplexEvent(data.getName());
+        alarm.setComplexEventSynopsis(data.getSynopsis());
+        alarm.setSite("西安");
+        alarm.setSystem("光纤授时光频系统");
+        knowledgeComplexEventAlarmRepository.save(alarm);
+    }
 }

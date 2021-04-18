@@ -12,9 +12,10 @@ import java.util.Map;
  */
 public class SubscribeUtil {
 
-    private static final String WSN_ADDR = "http://192.168.253.1:9011/wsn-core";//固定，发布订阅机器ip
-
-    private static final String SENT_ADDR = "http://192.168.253.11:9020/wsn-subscribe";//发布订阅的机器ip，端口不能重复
+    // 当前默认为
+    private static final String WSN_ADDR = "http://"+ System.getProperty("subscribe_wsn_addr")+ "/wsn-core";//固定，发布订阅机器ip
+    // 当前默认为
+    private static final String SENT_ADDR = "http://"+ System.getProperty("subscribe_send_addr") +"/wsn-subscribe";//发布订阅的机器ip，端口不能重复
 
 
     public static final String TOPIC_TELEMTRY = "data";

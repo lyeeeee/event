@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,23 @@ public class KnowledgeDirectoryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KnowledgeDirectoryService.class);
     @Autowired
-    DirectoryRepository directoryRepository;
+    private DirectoryRepository directoryRepository;
+
+    private static Lock globalLock = new ReentrantLock(false);
+
+    private DirectoryNode root = new DirectoryNode();
+
+    {
+        root = null;
+    }
+
+    public DirectoryNode getRoot() {
+        return root;
+    }
+
+    public void setRoot(DirectoryNode root) {
+        this.root = root;
+    }
 
     public JsonResult<Object> addOrUpdateDirectoryNode(DirectoryNode directoryNode) {
         DirectoryNode node = directoryRepository.save(directoryNode);

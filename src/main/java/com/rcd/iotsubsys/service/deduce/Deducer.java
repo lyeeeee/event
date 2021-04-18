@@ -3,10 +3,7 @@ package com.rcd.iotsubsys.service.deduce;
 import com.alibaba.fastjson.JSONObject;
 import com.microsoft.z3.*;
 
-import com.rcd.iotsubsys.domain.event.EventConstraint;
-import com.rcd.iotsubsys.domain.event.MetaEventAttrRelation;
-import com.rcd.iotsubsys.domain.event.PubSubEvent;
-import com.rcd.iotsubsys.domain.event.Valid;
+import com.rcd.iotsubsys.domain.event.*;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexEvent;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexSubEvnet;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexTarget;
@@ -16,10 +13,16 @@ import com.rcd.iotsubsys.service.event.ComplexEventService;
 import com.rcd.iotsubsys.service.event.MetaEventService;
 import com.rcd.iotsubsys.service.util.StringUtil;
 import com.rcd.iotsubsys.util.ClassUtil;
+import com.rcd.iotsubsys.util.MathMLUtil;
 import com.rcd.iotsubsys.util.PublishUtil;
 import com.rcd.iotsubsys.util.SubscribeUtil;
 
 import com.rcd.iotsubsys.wsn.subscribe.soap.wsn.UserNotificationProcessImpl;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -28,7 +31,7 @@ import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import java.util.regex.Pattern;
@@ -47,6 +50,17 @@ public class Deducer implements Runnable {
     private static volatile boolean subscribed = false;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Deducer.class);
+
+    private static int clientNum = 0;
+
+    private static int serverPort = 11111;
+
+    NioEventLoopGroup bossGroup = new NioEventLoopGroup();
+    NioEventLoopGroup workeGroup = new NioEventLoopGroup();
+
+    ServerBootstrap serverBootstrap = new ServerBootstrap();
+
+    private AtomicBoolean solved = new AtomicBoolean(false);
     /**
      * 默认时间窗口两分钟
      * */
@@ -67,7 +81,7 @@ public class Deducer implements Runnable {
 
     public Map<String, Class<?>> cachedTopicClasses = new HashMap<>();
 
-    public volatile boolean stop;
+    public volatile AtomicBoolean stop = new AtomicBoolean(false);
 
     public UserNotificationProcessImpl userNotificationProcessImpl;
 
@@ -78,6 +92,10 @@ public class Deducer implements Runnable {
     private MetaEventService metaEventService;
 
     public Map<String, Deque<PubSubEvent>> eventBuffer = new HashMap<>();
+
+    private MathMLUtil mathMLUtil = new MathMLUtil();
+
+    private boolean valid = true;
 
     /**
      * 记录首尾事件，避免重复推理
@@ -135,6 +153,13 @@ public class Deducer implements Runnable {
     }
 
     public void deduce(Long complexId) throws InterruptedException {
+        /**
+         * 订阅主题
+         * */
+        if (!subscribed) {
+            subscribed = true;
+            SubscribeUtil.subscribe(SubscribeUtil.TOPIC_TELEMTRY);
+        }
         KnowledgeComplexEvent complexEvent = (KnowledgeComplexEvent) complexEventService.getComplexEventById(complexId).getData();
 
         JsonResult<Object> result = complexEventService.getAllSubEvent(complexId);
@@ -143,284 +168,430 @@ public class Deducer implements Runnable {
 
         // 复杂事件包括了哪些目标
         List<KnowledgeComplexTarget> allTargets = (List<KnowledgeComplexTarget>) complexEventService.getAllTarget(complexId).getData();
-        // 设置时间窗口或长度窗口
-        if (allTargets.get(0).getTimeWindow() == null && allTargets.get(0).getLenWindow() == null) {
-            useDefaultWindowPolicy = true;
-        } else {
-            if (allTargets.get(0).getTimeWindow() != null) {
-                useTimeWindow = true;
-                timeWindow = Integer.parseInt(allTargets.get(0).getTimeWindow()) * 60 * 1000;
-            } else if(allTargets.get(0).getLenWindow() == null){
+        /**
+         * 以下逻辑将目标读取出来， 然后按连接的结点数量进行切分
+         * 之后分发到各个节点上
+         * */
+        try {
+            String totalTarget = complexEvent.getTargetRelation();
+            String[] targets = splitTotalTarget(totalTarget);
+            // 设置时间窗口或长度窗口
+            if (allTargets.get(0).getTimeWindow() == null && allTargets.get(0).getLenWindow() == null) {
                 useDefaultWindowPolicy = true;
             } else {
-                useTimeWindow = false;
-                lenWindow = allTargets.get(0).getLenWindow();
-            }
-        }
-        List<Long> metaEventIds = allSubEvents.stream().map(KnowledgeComplexSubEvnet::getSubeventId).collect(Collectors.toList());
-        // 所有的metaEvent
-        List<KnowledgeMetaEvent> allMetaEvents = (List<KnowledgeMetaEvent>) metaEventService.getMetaEventByIds(metaEventIds).getData();
-        // key: metaEvnetId   value: metaEvent
-        Map<Long, KnowledgeMetaEvent> eventIdWithMetaEvent = allMetaEvents.stream().collect(Collectors.toMap(KnowledgeMetaEvent::getId, Function.identity()));
-        // 这些原子事件涉及了哪些需要推理的属性
-        List<MetaEventAttrRelation> allAttrRelation =
-            (List<MetaEventAttrRelation>) metaEventService.getAllRelationByIds(metaEventIds).getData();
-        // 消息同知识uri的映射
-        Map<String, String> messageMapToKnowledgeUri = new HashMap<>();
-        // 原子事件id+属性名同uri的映射
-        Map<String, String> metaEventIdAndAttrMapToUri = new HashMap<>();
-        for (MetaEventAttrRelation relation : allAttrRelation) {
-            messageMapToKnowledgeUri.put(relation.getDeviceName()+relation.getDataName(), relation.getKnowledgeAttribute());
-            metaEventIdAndAttrMapToUri.put(relation.getMetaEventId()+relation.getTopicAttribute(), relation.getKnowledgeAttribute());
-        }
-
-        Map<Long, List<KnowledgeComplexSubEvnet>> metaEventIdWithSubEvent = new HashMap<>();
-        Map<Long, List<KnowledgeComplexTarget>> metaEventIdWithTarget = new HashMap<>();
-        for (KnowledgeComplexSubEvnet subEvnet : allSubEvents) {
-            List<KnowledgeComplexSubEvnet> tmp;
-            if ((tmp = metaEventIdWithSubEvent.get(subEvnet.getSubeventId())) == null) {
-                tmp = new ArrayList<>();
-            }
-            tmp.add(subEvnet);
-            metaEventIdWithSubEvent.put(subEvnet.getSubeventId(), tmp);
-        }
-        for (KnowledgeComplexTarget target : allTargets) {
-            List<KnowledgeComplexTarget> tmp;
-            if ((tmp = metaEventIdWithTarget.get(target.getSubeventId())) == null) {
-                tmp = new ArrayList<>();
-            }
-            tmp.add(target);
-            metaEventIdWithTarget.put(target.getSubeventId(), tmp);
-        }
-        // 每一个属性映射即是推理的一个事件，针对每一条属性映射，找到对于该属性映射的限制，
-        EventConstraint eventConstraint = new EventConstraint();
-
-        // 设置整体子事件属性限制
-        eventConstraint.setLogicRelation(complexEvent.getIdRelation());
-
-        for (MetaEventAttrRelation metaEventAttrRelation : allAttrRelation) {
-
-            eventConstraint.addDeviceNameAndDataName(metaEventAttrRelation.getDeviceName(), metaEventAttrRelation.getDataName());
-
-            eventConstraint.addMetaEventAttrRelation(metaEventAttrRelation);
-
-            // 一条属性映射，对应的所有的子事件限制
-            List<KnowledgeComplexSubEvnet> tmp = metaEventIdWithSubEvent.get(metaEventAttrRelation.getMetaEventId());
-            for (KnowledgeComplexSubEvnet subEvnet : tmp) {
-                String relationValue = subEvnet.getRelationValue();
-                Valid valid;
-                if (relationValue.contains("~")) {
-                    valid = new Valid(subEvnet.getId()
-                        , subEvnet.getAttributeRelation()
-                        , Double.parseDouble(relationValue.split("~")[0])
-                        , Double.parseDouble(relationValue.split("~")[1])
-                        , subEvnet.getSubeventId()
-                        , metaEventAttrRelation.getTopicAttribute());
+                if (allTargets.get(0).getTimeWindow() != null) {
+                    useTimeWindow = true;
+                    timeWindow = Integer.parseInt(allTargets.get(0).getTimeWindow()) * 60 * 1000;
+                } else if(allTargets.get(0).getLenWindow() == null){
+                    useDefaultWindowPolicy = true;
                 } else {
-                    valid = new Valid(subEvnet.getId()
-                        , subEvnet.getAttributeRelation()
-                        , Double.parseDouble(subEvnet.getRelationValue())
-                        , subEvnet.getSubeventId()
-                        , metaEventAttrRelation.getTopicAttribute());
+                    useTimeWindow = false;
+                    lenWindow = allTargets.get(0).getLenWindow();
                 }
-                // valid的id是子事件限制id
-                eventConstraint.addValid(valid);
+            }
+            List<Long> metaEventIds = allSubEvents.stream().map(KnowledgeComplexSubEvnet::getSubeventId).collect(Collectors.toList());
+            // 所有的metaEvent
+            List<KnowledgeMetaEvent> allMetaEvents = (List<KnowledgeMetaEvent>) metaEventService.getMetaEventByIds(metaEventIds).getData();
+            // key: metaEvnetId   value: metaEvent
+            Map<Long, KnowledgeMetaEvent> eventIdWithMetaEvent = allMetaEvents.stream().collect(Collectors.toMap(KnowledgeMetaEvent::getId, Function.identity()));
+            // 这些原子事件涉及了哪些需要推理的属性
+            List<MetaEventAttrRelation> allAttrRelation =
+                (List<MetaEventAttrRelation>) metaEventService.getAllRelationByIds(metaEventIds).getData();
+            // 消息同知识uri的映射
+            Map<String, String> messageMapToKnowledgeUri = new HashMap<>();
+            // 原子事件id+属性名同uri的映射
+            Map<String, String> metaEventIdAndAttrMapToUri = new HashMap<>();
+            for (MetaEventAttrRelation relation : allAttrRelation) {
+                messageMapToKnowledgeUri.put(relation.getDeviceName()+relation.getDataName(), relation.getKnowledgeAttribute());
+                metaEventIdAndAttrMapToUri.put(relation.getMetaEventId()+relation.getTopicAttribute(), relation.getKnowledgeAttribute());
+            }
+            //TODO
+            //messageMapToKnowledgeUri.put("参考腔稳频激光器单元光频透射峰电压", "http://www.w3.org/ns/sosa/光频_透射峰电压");
+
+            Map<Long, List<KnowledgeComplexSubEvnet>> metaEventIdWithSubEvent = new HashMap<>();
+            Map<Long, List<KnowledgeComplexTarget>> metaEventIdWithTarget = new HashMap<>();
+            for (KnowledgeComplexSubEvnet subEvnet : allSubEvents) {
+                List<KnowledgeComplexSubEvnet> tmp;
+                if ((tmp = metaEventIdWithSubEvent.get(subEvnet.getSubeventId())) == null) {
+                    tmp = new ArrayList<>();
+                }
+                tmp.add(subEvnet);
+                metaEventIdWithSubEvent.put(subEvnet.getSubeventId(), tmp);
+            }
+            for (KnowledgeComplexTarget target : allTargets) {
+                List<KnowledgeComplexTarget> tmp;
+                if ((tmp = metaEventIdWithTarget.get(target.getSubeventId())) == null) {
+                    tmp = new ArrayList<>();
+                }
+                tmp.add(target);
+                metaEventIdWithTarget.put(target.getSubeventId(), tmp);
+            }
+            // 每一个属性映射即是推理的一个事件，针对每一条属性映射，找到对于该属性映射的限制，
+            EventConstraint eventConstraint = new EventConstraint();
+
+            // 设置整体子事件属性限制
+            eventConstraint.setLogicRelation(complexEvent.getIdRelation());
+
+            for (MetaEventAttrRelation metaEventAttrRelation : allAttrRelation) {
+
+                eventConstraint.addDeviceNameAndDataName(metaEventAttrRelation.getDeviceName(), metaEventAttrRelation.getDataName());
+
+                eventConstraint.addMetaEventAttrRelation(metaEventAttrRelation);
+
+                // 一条属性映射，对应的所有的子事件限制
+                List<KnowledgeComplexSubEvnet> tmp = metaEventIdWithSubEvent.get(metaEventAttrRelation.getMetaEventId());
+                for (KnowledgeComplexSubEvnet subEvnet : tmp) {
+                    String relationValue = subEvnet.getRelationValue();
+                    Valid valid;
+                    if (relationValue.contains("~")) {
+                        valid = new Valid(subEvnet.getId()
+                            , subEvnet.getAttributeRelation()
+                            , Double.parseDouble(relationValue.split("~")[0])
+                            , Double.parseDouble(relationValue.split("~")[1])
+                            , subEvnet.getSubeventId()
+                            , metaEventAttrRelation.getTopicAttribute());
+                    } else {
+                        valid = new Valid(subEvnet.getId()
+                            , subEvnet.getAttributeRelation()
+                            , Double.parseDouble(subEvnet.getRelationValue())
+                            , subEvnet.getSubeventId()
+                            , metaEventAttrRelation.getTopicAttribute());
+                    }
+                    // valid的id是子事件限制id
+                    eventConstraint.addValid(valid);
+                }
+
             }
 
-        }
-
-        // 整体目标限制
-        EventConstraint targetConstraint = new EventConstraint();
-        targetConstraint.setLogicRelation(complexEvent.getIdTargetRelation());
-        for (MetaEventAttrRelation metaEventAttrRelation : allAttrRelation) {
-            // 一条属性映射，对应的所有的子事件限制
-            List<KnowledgeComplexTarget> tmp = metaEventIdWithTarget.get(metaEventAttrRelation.getMetaEventId());
-            for (KnowledgeComplexTarget target : tmp) {
-                // valid的id是子事件限制id
-                String relationValue = target.getRelationValue();
-                Valid valid;
-                if (relationValue.contains("~")) {
-                    valid = new Valid(target.getId()
-                        , target.getAttributeRelation()
-                        , Double.parseDouble(relationValue.split("~")[0])
-                        , Double.parseDouble(relationValue.split("~")[1])
-                        , target.getSubeventId()
-                        , metaEventAttrRelation.getTopicAttribute());
-                } else {
-                    valid = new Valid(target.getId()
-                        , target.getAttributeRelation()
-                        , Double.parseDouble(target.getRelationValue())
-                        , target.getSubeventId()
-                        , metaEventAttrRelation.getTopicAttribute());
+            // 整体目标限制
+            EventConstraint targetConstraint = new EventConstraint();
+            targetConstraint.setLogicRelation(complexEvent.getIdTargetRelation());
+            for (MetaEventAttrRelation metaEventAttrRelation : allAttrRelation) {
+                // 一条属性映射，对应的所有的子事件限制
+                List<KnowledgeComplexTarget> tmp = metaEventIdWithTarget.get(metaEventAttrRelation.getMetaEventId());
+                for (KnowledgeComplexTarget target : tmp) {
+                    // valid的id是子事件限制id
+                    String relationValue = target.getRelationValue();
+                    Valid valid;
+                    if (relationValue.contains("~")) {
+                        valid = new Valid(target.getId()
+                            , target.getAttributeRelation()
+                            , Double.parseDouble(relationValue.split("~")[0])
+                            , Double.parseDouble(relationValue.split("~")[1])
+                            , target.getSubeventId()
+                            , metaEventAttrRelation.getTopicAttribute());
+                    } else {
+                        valid = new Valid(target.getId()
+                            , target.getAttributeRelation()
+                            , Double.parseDouble(target.getRelationValue())
+                            , target.getSubeventId()
+                            , metaEventAttrRelation.getTopicAttribute());
+                    }
+                    // valid的id是子事件限制id
+                    targetConstraint.addValid(valid);
                 }
-                // valid的id是子事件限制id
-                targetConstraint.addValid(valid);
             }
-        }
 
-        for (MetaEventAttrRelation relation : allAttrRelation) {
-            String queueName = relation.getDeviceName()+ relation.getDataName();
-            eventBuffer.put(queueName, new LinkedBlockingDeque<>());
-        }
+            for (MetaEventAttrRelation relation : allAttrRelation) {
+                String queueName = relation.getDeviceName()+ relation.getDataName();
+                eventBuffer.put(queueName, new LinkedBlockingDeque<>());
+            }
 
-        Map<String, FuncDecl> uriToFunction = new HashMap<>();
+            Map<String, FuncDecl> uriToFunction = new HashMap<>();
 
-        String targetRelation = '(' + complexEvent.getIdTargetRelation() + ')';
+            String targetRelation = '(' + complexEvent.getIdTargetRelation() + ')';
 
-        Map<Long, BoolExpr> quantifierMap = new HashMap<>();
+            Map<Long, BoolExpr> quantifierMap = new HashMap<>();
 
-        FuncDecl[] funcDecls = new FuncDecl[allAttrRelation.size()];
+            FuncDecl[] funcDecls = new FuncDecl[allAttrRelation.size()];
 
-        Sort longSort = context.mkIntSort();
-        Sort stringSort = context.mkStringSort();
-        Sort doubleSort = context.mkFPSortDouble();
+            Sort longSort = context.mkIntSort();
+            Sort stringSort = context.mkStringSort();
+            Sort doubleSort = context.mkFPSortDouble();
 
-        Expr[][] constVariable = new Expr[allAttrRelation.size()][2];
-        for (int i = 0;i < allAttrRelation.size(); ++i) {
-            MetaEventAttrRelation relation = allAttrRelation.get(i);
-            String uri = relation.getKnowledgeAttribute();
-            // 构造函数和变量
-            funcDecls[i] = context.mkFuncDecl(uri, new Sort[]{stringSort, longSort}, doubleSort);
+            Expr[][] constVariable = new Expr[allAttrRelation.size()][2];
+            for (int i = 0;i < allAttrRelation.size(); ++i) {
+                MetaEventAttrRelation relation = allAttrRelation.get(i);
+                String uri = relation.getKnowledgeAttribute();
+                // 构造函数和变量
+                funcDecls[i] = context.mkFuncDecl(uri, new Sort[]{stringSort, longSort}, doubleSort);
 
-            uriToFunction.put(relation.getKnowledgeAttribute(), funcDecls[i]);
-            constVariable[i][0] = context.mkConst("x" + i, stringSort);
-            constVariable[i][1] = context.mkConst("y" + i, longSort);
+                uriToFunction.put(relation.getKnowledgeAttribute(), funcDecls[i]);
+                constVariable[i][0] = context.mkConst("x" + i, stringSort);
+                constVariable[i][1] = context.mkConst("y" + i, longSort);
 
-            // 找到该属性涉及到的目标约束
-            List<Valid> valids = targetConstraint.validsMap.get(relation.getMetaEventId()+relation.getTopicAttribute());
-            for (Valid valid : valids) {
-                Quantifier quantifier = null;
-                if (valid.getComparator().equals("0")) {
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        , context.mkFPLt((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
-                            , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
-                } else if (valid.getComparator().equals("1")) {
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        , context.mkFPLEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
-                            , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
-                } else if (valid.getComparator().equals("2")) {
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        , context.mkFPEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
-                            , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
-                } else if (valid.getComparator().equals("3")) {
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        , context.mkFPGEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
-                            , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
-                } else if (valid.getComparator().equals("4")) {
-                    Expr left = context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]);
-                    FPExpr right = context.mkFP(valid.getValue(), context.mkFPSortDouble());
-                    Expr tmp = context.mkFPGt((FPExpr) left, right);
-                    quantifier = context.mkForall(new Expr[]{constVariable[i][0], constVariable[i][1]}, tmp, 1, null, null, null, null);
-                } else if (valid.getComparator().equals("5")) {
-                    BoolExpr expr1 = context.mkFPGt((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getValue(), context.mkFPSortDouble()));
-                    BoolExpr expr2 = context.mkFPLt((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getAnotherValue(), context.mkFPSortDouble()));
+                // 找到该属性涉及到的目标约束
+                List<Valid> valids = targetConstraint.validsMap.get(relation.getMetaEventId()+relation.getTopicAttribute());
+                for (Valid valid : valids) {
+                    Quantifier quantifier = null;
+                    if (valid.getComparator().equals("0")) {
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            , context.mkFPLt((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
+                                , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
+                    } else if (valid.getComparator().equals("1")) {
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            , context.mkFPLEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
+                                , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
+                    } else if (valid.getComparator().equals("2")) {
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            , context.mkFPEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
+                                , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
+                    } else if (valid.getComparator().equals("3")) {
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            , context.mkFPGEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
+                                , context.mkFP(valid.getValue(), context.mkFPSortDouble())), 1, null, null, null, null);
+                    } else if (valid.getComparator().equals("4")) {
+                        Expr left = context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]);
+                        FPExpr right = context.mkFP(valid.getValue(), context.mkFPSortDouble());
+                        Expr tmp = context.mkFPGt((FPExpr) left, right);
+                        quantifier = context.mkForall(new Expr[]{constVariable[i][0], constVariable[i][1]}, tmp, 1, null, null, null, null);
+                    } else if (valid.getComparator().equals("5")) {
+                        BoolExpr expr1 = context.mkFPGt((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getValue(), context.mkFPSortDouble()));
+                        BoolExpr expr2 = context.mkFPLt((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getAnotherValue(), context.mkFPSortDouble()));
 
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        ,context.mkAnd(expr1, expr2)
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            ,context.mkAnd(expr1, expr2)
                             , 1, null, null, null, null);
-                } else if (valid.getComparator().equals("6")) {
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        , context.mkNot(context.mkFPEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
-                            , context.mkFP(valid.getValue(), context.mkFPSortDouble()))), 1, null, null, null, null);
-                } else if (valid.getComparator().equals("7")) {
-                    BoolExpr expr1 = context.mkFPGEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getValue(), context.mkFPSortDouble()));
-                    BoolExpr expr2 = context.mkFPLEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getAnotherValue(), context.mkFPSortDouble()));
+                    } else if (valid.getComparator().equals("6")) {
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            , context.mkNot(context.mkFPEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1])
+                                , context.mkFP(valid.getValue(), context.mkFPSortDouble()))), 1, null, null, null, null);
+                    } else if (valid.getComparator().equals("7")) {
+                        BoolExpr expr1 = context.mkFPGEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getValue(), context.mkFPSortDouble()));
+                        BoolExpr expr2 = context.mkFPLEq((FPExpr)context.mkApp(funcDecls[i], constVariable[i][0], constVariable[i][1]), context.mkFP(valid.getAnotherValue(), context.mkFPSortDouble()));
 
-                    quantifier = context.mkForall(
-                        new Expr[]{constVariable[i][0], constVariable[i][1]}
-                        ,context.mkAnd(expr1, expr2)
-                        , 1, null, null, null, null);
-                }
-                quantifierMap.put(valid.getId(), quantifier);
-            }
-        }
-        char[] arr = targetRelation.toCharArray();
-        Stack<Character> cStack = new Stack<>();
-        Stack<BoolExpr> exprStack = new Stack<>();
-        for (char c : arr) {
-            if (c == ')') {
-                String tmp = "";
-                while (cStack.peek() != '(') {
-                    tmp = cStack.pop() + tmp;
-                }
-                cStack.pop();
-                if (tmp.contains("&")) {
-                    Long left = Long.parseLong(tmp.split("&")[0]);
-                    Long right = Long.parseLong(tmp.split("&")[0]);
-                    BoolExpr boolExpr = context.mkAnd(exprStack.pop(), exprStack.pop());
-                    String newNum = left + "" + right;
-                    quantifierMap.put(Long.parseLong(newNum), boolExpr);
-                    exprStack.push(boolExpr);
-                    for (char i : newNum.toCharArray()) {
-                        cStack.push(i);
+                        quantifier = context.mkForall(
+                            new Expr[]{constVariable[i][0], constVariable[i][1]}
+                            ,context.mkAnd(expr1, expr2)
+                            , 1, null, null, null, null);
                     }
-                } else if(tmp.contains("|")) {
-                    Long left = Long.parseLong(tmp.split("\\|")[0]);
-                    Long right = Long.parseLong(tmp.split("\\|")[0]);
-                    BoolExpr boolExpr = context.mkOr(exprStack.pop(), exprStack.pop());
-                    String newNum = left + "" + right;
-                    quantifierMap.put(Long.parseLong(newNum), boolExpr);
-                    exprStack.push(boolExpr);
-                    for (char i : newNum.toCharArray()) {
-                        cStack.push(i);
+                    quantifierMap.put(valid.getId(), quantifier);
+                }
+            }
+            char[] arr = targetRelation.toCharArray();
+            Stack<Character> cStack = new Stack<>();
+            Stack<BoolExpr> exprStack = new Stack<>();
+            for (char c : arr) {
+                if (c == ')') {
+                    String tmp = "";
+                    while (cStack.peek() != '(') {
+                        tmp = cStack.pop() + tmp;
+                    }
+                    cStack.pop();
+                    if (tmp.contains("&")) {
+                        Long left = Long.parseLong(tmp.split("&")[0]);
+                        Long right = Long.parseLong(tmp.split("&")[0]);
+                        BoolExpr boolExpr = context.mkAnd(exprStack.pop(), exprStack.pop());
+                        String newNum = left + "" + right;
+                        quantifierMap.put(Long.parseLong(newNum), boolExpr);
+                        exprStack.push(boolExpr);
+                        for (char i : newNum.toCharArray()) {
+                            cStack.push(i);
+                        }
+                    } else if(tmp.contains("|")) {
+                        Long left = Long.parseLong(tmp.split("\\|")[0]);
+                        Long right = Long.parseLong(tmp.split("\\|")[0]);
+                        BoolExpr boolExpr = context.mkOr(exprStack.pop(), exprStack.pop());
+                        String newNum = left + "" + right;
+                        quantifierMap.put(Long.parseLong(newNum), boolExpr);
+                        exprStack.push(boolExpr);
+                        for (char i : newNum.toCharArray()) {
+                            cStack.push(i);
+                        }
+                    } else {
+                        for (char i : tmp.toCharArray()) {
+                            cStack.push(i);
+                        }
+                        exprStack.push(quantifierMap.get(Long.parseLong(tmp)));
                     }
                 } else {
-                    for (char i : tmp.toCharArray()) {
-                        cStack.push(i);
-                    }
-                    exprStack.push(quantifierMap.get(Long.parseLong(tmp)));
+                    cStack.push(c);
                 }
-            } else {
-                cStack.push(c);
             }
-        }
-        BoolExpr targetExpr = exprStack.pop();
-
-        LOGGER.info("construct target Boolean expr : {}", targetExpr.toString());
-        solver.add(targetExpr);
-        /**
-         * 订阅主题
-         * */
-        if (!subscribed) {
-            subscribed = true;
-            SubscribeUtil.subscribe(SubscribeUtil.TOPIC_TELEMTRY);
-        }
-
-        /**
-         * 没有停止推理时，就反复获取事件，推理
-         * */
-        while (!stop) {
-
-            boolean hasDeduced = false;
-            boolean actuallyDeduced = false;
+            BoolExpr targetExpr = exprStack.pop();
 
             /**
-             * 将消息从buffer种取出， 构造成事件，根据设备+数据名构放入对应的双端阻塞队列中
+             * 添加公式知识
              * */
-            if (!canDeduceOnce()) {
-                consumeMessage(eventConstraint);
-            } else {
+            Map<String, RealExpr> uilToExperMap = new HashMap<>();
+            Map<String, String> dataNameToUilMap = new HashMap<>();
+            dataNameToUilMap.put("参考腔稳频激光器单元光频透射峰电压", "http://www.w3.org/ns/sosa/光频_透射峰电压");
+            uilToExperMap.put("http://www.w3.org/ns/sosa/光频_透射峰电压", context.mkRealConst("http://www.w3.org/ns/sosa/光频_透射峰电压"));
+
+            dataNameToUilMap.put("EDFA设备输入光功率", "http://www.w3.org/ns/sosa/光频_输入功率");
+            uilToExperMap.put("http://www.w3.org/ns/sosa/光频_输入功率", context.mkRealConst("http://www.w3.org/ns/sosa/光频_输入功率"));
+
+            dataNameToUilMap.put("EDFA设备输出光功率", "http://www.w3.org/ns/sosa/光频_输出功率");
+            uilToExperMap.put("http://www.w3.org/ns/sosa/光频_输出功率", context.mkRealConst("http://www.w3.org/ns/sosa/光频_输出功率"));
+
+//            List<Object[]> formulas = (List<Object[]>) complexEventService.getFomulaSelectedByComplexId(complexId).getData();
+//            BoolExpr formulaExpr = mathMLUtil.getExprByMathML(formulas, context, uilToExperMap, dataNameToUilMap);
+//            targetExpr = context.mkAnd(targetExpr, formulaExpr);
+
+
+            /**
+             * 创建一个公式
+             * */
+//            ArithExpr arithExprX = context.mkPower(context.mkIntConst("http://www.w3.org/ns/sosa/光频_输入功率"), context.mkInt(2));
+//            ArithExpr arithExprY = context.mkPower(context.mkIntConst("http://www.w3.org/ns/sosa/光频_输出功率"), context.mkInt(3));
+//            ArithExpr arithExprZ = context.mkPower(context.mkIntConst("http://www.w3.org/ns/sosa/光频_电源状态"), context.mkInt(2));
+//            BoolExpr expr = context.mkLe(context.mkSub(context.mkAdd(arithExprX, arithExprY), arithExprZ), context.mkInt(1));
+//            targetExpr = context.mkAnd(targetExpr, expr);
+            LOGGER.info("construct target Boolean expr : {}", targetExpr.toString());
+            solver.add(targetExpr);
+//
+//            for (int i = 0;i < solver.getAssertions().length; ++i) {
+//                System.out.println("No" + i + ":" + solver.getAssertions()[i].toString());
+//            }
+
+            /**
+             * 构造消息和事件的映射表
+             * */
+//            Map<String, String> messageEventTable = new HashMap<>();
+
+
+
+             /**
+             * 订阅主题
+             * */
+            if (!subscribed) {
+                subscribed = true;
+                SubscribeUtil.subscribe(SubscribeUtil.TOPIC_TELEMTRY);
+            }
+
+            /**
+             * 没有停止推理时，就反复获取事件，推理
+             * */
+            while (!stop.get()) {
+
+                boolean hasDeduced = false;
+                boolean actuallyDeduced = false;
+
                 /**
-                 * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
+                 * 将消息从buffer种取出， 构造成事件，根据设备+数据名构放入对应的双端阻塞队列中
                  * */
-                actuallyDeduced = _deduce(messageMapToKnowledgeUri, uriToFunction, complexId);
-                consumeMessage(eventConstraint);
-                hasDeduced = true;
+                if (!canDeduceOnce()) {
+                    consumeMessage(eventConstraint);
+                } else {
+                    /**
+                     * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
+                     * */
+                    actuallyDeduced = _deduce(messageMapToKnowledgeUri, uriToFunction, complexId, dataNameToUilMap, uilToExperMap);
+                    consumeMessage(eventConstraint);
+                    hasDeduced = true;
+                }
+                /**
+                 * 移除每个队列的队头元素,继续进行下一轮推理
+                 * */
+                if (hasDeduced || actuallyDeduced) clearBuffer();
+                if (!hasDeduced || !actuallyDeduced) Thread.yield();
             }
-            /**
-             * 移除每个队列的队头元素,继续进行下一轮推理
-             * */
-            if (hasDeduced || actuallyDeduced) clearBuffer();
-            if (!hasDeduced || !actuallyDeduced) Thread.yield();
-        }
+//
+//            LOGGER.info("deducer task stop!");
 
-        LOGGER.info("deducer task stop!");
+//            serverBootstrap.group(bossGroup,workeGroup)
+//                .channel(NioServerSocketChannel.class)
+//                .childHandler(new ChannelInitializer<NioSocketChannel>() {
+//                    @Override
+//                    protected void initChannel(NioSocketChannel ch) throws Exception {
+//                        ch.pipeline().addLast(new LengthFieldBasedFrameDecoder(65536, 0, 4, 0, 0))
+//                            .addLast(new CamputeDecoder(CamputeRequest.class))
+//                            .addLast(new CamputeEncoder(CamputeResponse.class))
+//                            .addLast(new CamputeHandler());
+//                    }
+//                });
+//
+//            bind(serverBootstrap, serverPort);
+
+
+            /**
+             * 没有停止推理时，就反复获取事件，推理
+             *
+             * */
+//            Set<ScheduleServer> scheduleServers = new HashSet<>();
+//            while (!stop.get()) {
+//
+//                boolean hasDeduced = false;
+//                boolean actuallyDeduced = false;
+//
+//                /**
+//                 * 将消息从buffer种取出， 构造成事件，根据设备+数据名构放入对应的双端阻塞队列中
+//                 * */
+//                if (!canDeduceOnce()) {
+//                    consumeMessage(eventConstraint);
+//                } else {
+//                    /**
+//                     * 已经将所有消息转化为事件放置到eventBuffer中， 判断合理后可以开始推理
+//                     * */
+//                    //actuallyDeduced = _deduce(messageMapToKnowledgeUri, uriToFunction, complexId, dataNameToUilMap, uilToExperMap);
+//                    ScheduleServer client = new ScheduleServer(deduceContext, complexId, scheduleServers, this);
+//                    scheduleServers.add(client);
+//                    client.init();
+//                    if (!client.completed()){
+//                        client.submitTask(messageEventTable,targets,eventBuffer);
+//                        consumeMessage(eventConstraint);
+//                        hasDeduced = true;
+//                    }
+//                    waitForSeconds();
+//                    deleteEvent(eventBuffer);
+//                }
+//                /**
+//                 * 移除每个队列的队头元素,继续进行下一轮推理
+//                 * */
+//                if (hasDeduced || actuallyDeduced) clearBuffer();
+//                if (!hasDeduced || !actuallyDeduced) Thread.yield();
+//            }
+
+        }catch (Exception e) {
+
+        }
+    }
+
+    private void deleteEvent(Map<String, Deque<PubSubEvent>> eventBuffer) {
+        for (Deque<PubSubEvent> d : eventBuffer.values()) {
+            if (!d.isEmpty()) {
+                d.removeFirst();
+            }
+        }
+    }
+
+    private void bind(ServerBootstrap serverBootstrap, int port){
+        ChannelFuture channelFuture = serverBootstrap.bind(port);
+        channelFuture.addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) throws Exception {
+                if(future.isSuccess())
+                    System.out.println("bind success");
+                else{
+                    System.out.println("bind failed, bind next port");
+                    bind(serverBootstrap, port+1);
+                }
+            }
+        });
+    }
+
+    private void waitForSeconds() {
+        try {
+            Thread.sleep(20000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    private String[] splitTotalTarget(String totalTarget) {
+        LOGGER.info("=============目标切割如下=============");
+        String[] targets = totalTarget.split("&");
+        for (String s : targets) {
+            s.replaceAll("[|()]", "");
+            System.out.println(s);
+        }
+        LOGGER.info("=====================================");
+        return targets;
     }
 
     private void consumeMessage(EventConstraint eventConstraint) {
@@ -440,6 +611,11 @@ public class Deducer implements Runnable {
             long time = System.currentTimeMillis();
 
             PubSubEvent event = new PubSubEvent(deviceName, dataName, siteName, time, Double.parseDouble(value));
+//            if (event.getValue() == 0.0) {
+//               valid = false;
+//            } else {
+//                valid = true;
+//            }
             if (!eventConstraint.inRange(event.getDeviceName(), event.getDataName())) {
                 continue;
             }
@@ -452,10 +628,18 @@ public class Deducer implements Runnable {
         }
     }
 
+    public boolean getValid() {
+        return this.valid;
+    }
+
     /**
      * 开始推理
      * */
-    private boolean _deduce(Map<String, String> messageMapToKnowledgeUri, Map<String, FuncDecl> uriToFunction, Long complexId) {
+    private boolean _deduce(Map<String, String> messageMapToKnowledgeUri
+        , Map<String, FuncDecl> uriToFunction
+        , Long complexId
+        , Map<String, String> dataNameToUri
+        , Map<String, RealExpr> urlToExprMap) {
 
         PubSubEvent left = null, right = null;
 
@@ -469,17 +653,32 @@ public class Deducer implements Runnable {
                 PubSubEvent event = buffer.removeFirst();
                 if (i == 0 ) left = event;
                 if (i == cnt-1) right = event;
-                expr = context.mkOr(
-                    expr,
-                    context.mkFPEq(
-                        (FPExpr) context.mkApp(uriToFunction.get(messageMapToKnowledgeUri.get(event.getDeviceNameAndDataName()))
-                            ,context.MkString(event.getLocation())
-                            , context.mkInt(event.getTime()))
-                        , context.mkFP(event.getValue(), context.mkFPSortDouble())));
-                buffer.offer(event);
+                if (messageMapToKnowledgeUri.get(event.getDeviceNameAndDataName()) != null) {
+                    expr = context.mkOr(
+                        expr,
+                        context.mkFPEq(
+                            (FPExpr) context.mkApp(uriToFunction.get(messageMapToKnowledgeUri.get(event.getDeviceNameAndDataName()))
+                                ,context.MkString(event.getLocation())
+                                , context.mkInt(event.getTime()))
+                            , context.mkFP(event.getValue(), context.mkFPSortDouble())));
+                    buffer.offer(event);
+                }
             }
             solver.add(expr);
         }
+
+//        for (String key : eventBuffer.keySet()) {
+//            Deque<PubSubEvent> buffer = eventBuffer.get(key);
+//            BoolExpr expr = context.mkBool(false);
+//            int cnt = buffer.size();
+//            for (int i = 0; i < cnt; ++i) {
+//                PubSubEvent event = buffer.removeFirst();
+//                if (dataNameToUri.containsKey(event.getDeviceNameAndDataName())) {
+//                    RealExpr expr1 = urlToExprMap.get(dataNameToUri.get(event.getDeviceNameAndDataName()));
+//                    solver.add(context.mkEq(expr1, context.mkFP(event.getValue(), context.mkFPSortDouble())));
+//                }
+//            }
+//        }
 
         if (!(left == begin && right == end)) {
             LOGGER.info("begin deduce once...");
@@ -572,7 +771,7 @@ public class Deducer implements Runnable {
     }
 
     public void shutDown() {
-        this.stop = true;
+        this.stop.set(true);
         this.userNotificationProcessImpl.deRegisterDeducer(this, SubscribeUtil.TOPIC_TELEMTRY);
     }
 
@@ -744,7 +943,8 @@ public class Deducer implements Runnable {
 
         System.out.println("===============================================");
 
-        testEventLogic2();
+
+        //testEventLogic2();
     }
 
     private static void testEventLogic() {

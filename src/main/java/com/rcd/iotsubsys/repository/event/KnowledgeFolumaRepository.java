@@ -14,4 +14,5 @@ import java.util.List;
 public interface KnowledgeFolumaRepository extends JpaRepository<FolumaKnowledge, Long> {
 
     List<FolumaKnowledge> getAllByIsComplete(Integer type);
+    List<FolumaKnowledge> getAllByIdIn(List<Long> ids);
 }

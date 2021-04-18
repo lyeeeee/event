@@ -2,6 +2,7 @@ package com.rcd.iotsubsys.service.deduce;
 
 import com.rcd.iotsubsys.domain.event.ComplexEvent;
 import com.rcd.iotsubsys.domain.knowledge.KnowledgeComplexEvent;
+import com.rcd.iotsubsys.repository.event.KnowledgeComplexEventAlarmRepository;
 import com.rcd.iotsubsys.service.event.ComplexEventService;
 import com.rcd.iotsubsys.service.event.MetaEventService;
 
@@ -45,9 +46,11 @@ public class DeduceContext {
     private UserNotificationProcessImpl userNotificationProcessImpl;
 
 
+
     public void foundComplexEvent(Long complexEventId) {
         KnowledgeComplexEvent data = (KnowledgeComplexEvent) this.complexEventService.getComplexEventById(complexEventId).getData();
         complexEventFounded.offer(data);
+        complexEventService.saveAlarm(data);
     }
 
     public synchronized void begainDeduce(Long complexId) {
@@ -60,7 +63,6 @@ public class DeduceContext {
         } else {
             LOGGER.info("deduce task exists");
         }
-
     }
 
     public synchronized void stopDeduce(Long complexEventId) {
