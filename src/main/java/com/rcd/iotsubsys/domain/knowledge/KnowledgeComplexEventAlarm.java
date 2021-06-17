@@ -27,8 +27,8 @@ public class KnowledgeComplexEventAlarm {
     /***
      * 系统
      */
-    @Column(name = "system", nullable = false)
-    private String system;
+    @Column(name = "sys", nullable = false)
+    private String sys;
 
     /***
      * 复杂事件
@@ -48,6 +48,20 @@ public class KnowledgeComplexEventAlarm {
     @Column(name = "site", nullable = false)
     private String site;
 
+    /***
+     * 时间
+     */
+    @Column(name = "time", nullable = false)
+    private String time;
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
     public Long getId() {
         return id;
     }
@@ -56,12 +70,12 @@ public class KnowledgeComplexEventAlarm {
         this.id = id;
     }
 
-    public String getSystem() {
-        return system;
+    public String getSys() {
+        return sys;
     }
 
-    public void setSystem(String system) {
-        this.system = system;
+    public void setSys(String sys) {
+        this.sys = sys;
     }
 
     public String getComplexEvent() {

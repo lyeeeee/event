@@ -11,6 +11,7 @@ import com.rcd.iotsubsys.repository.knowledge.KnowledgeRepository;
 import com.rcd.iotsubsys.service.deduce.DeduceContext;
 import com.rcd.iotsubsys.service.directory.KnowledgeDirectoryService;
 import com.rcd.iotsubsys.service.knowledge.KnowledgeService;
+import org.apache.jena.base.Sys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -383,6 +384,15 @@ public class ComplexEventService {
         return new JsonResult<>(result);
     }
 
+    public JsonResult<Object> getDeduceResultAnother() {
+        List<KnowledgeComplexEvent> result = new ArrayList<>();
+        KnowledgeComplexEvent complexEvent = null;
+        while ((complexEvent = DeduceContext.complexEventFoundedForZX.poll()) != null) {
+            result.add(complexEvent);
+        }
+        return new JsonResult<>(result);
+    }
+
     public JsonResult<Object> getKnowledgeByComplexId(Long complexEventID) {
         List<SelectedKnowledge> knowledges = complexEventKnowledgeRepository.findAllByComplexId(complexEventID);
         List<Long> ids = new ArrayList<>();
@@ -556,7 +566,8 @@ public class ComplexEventService {
         alarm.setComplexEvent(data.getName());
         alarm.setComplexEventSynopsis(data.getSynopsis());
         alarm.setSite("西安");
-        alarm.setSystem("光纤授时光频系统");
+        alarm.setSys("光纤授时光频系统");
+        alarm.setTime("" + new Date().toString());
         knowledgeComplexEventAlarmRepository.save(alarm);
     }
 }

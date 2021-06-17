@@ -143,6 +143,12 @@ public class ComplexEventController {
         return complexEventService.getDeduceResult();
     }
 
+    @RequestMapping(value = "/getDeduceResultAnother", method = RequestMethod.GET)
+    public JsonResult<Object> getDeduceResultAnother() {
+        LOGGER.info("getDeduceResultAnother....");
+        return complexEventService.getDeduceResultAnother();
+    }
+
     @RequestMapping(value = "/getKnowledgeByComplexId", method = RequestMethod.GET)
     public JsonResult<Object> getKnowledgeByComplexId(@RequestParam Long complexEventId) {
         LOGGER.info("getKnowledgeByComplexId....");

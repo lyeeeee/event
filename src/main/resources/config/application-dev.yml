@@ -15,9 +15,9 @@
 
 logging:
     level:
-        ROOT: DEBUG
-        io.github.jhipster: DEBUG
-        com.rcd.iotsubsys: DEBUG
+        ROOT: INFO
+        io.github.jhipster: INFO
+        com.rcd.iotsubsys: INFO
 
 spring:
     profiles:
@@ -38,8 +38,10 @@ spring:
     datasource:
         type: com.zaxxer.hikari.HikariDataSource
 #        url: jdbc:h2:file:./build/h2db/db/iot_knowledge_sub_system;DB_CLOSE_DELAY=-1
-        url: jdbc:mysql://localhost:3306/optical_fiber_system?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+        #url: jdbc:mysql://192.168.231.21:3306/optical_fiber_system?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
+        url: jdbc:mysql://127.0.0.1:3306/optical_fiber_system?allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=utf8&useSSL=false&useLegacyDatetimeCode=false&serverTimezone=UTC
         username: root
+        #password: 123456
         password: root
         hikari:
             auto-commit: false
@@ -49,7 +51,6 @@ spring:
     jpa:
         database-platform: org.hibernate.dialect.MySQL5Dialect
         database: MYSQL
-        show-sql: true
         hibernate:
             ddl-auto: update
         properties:
@@ -58,6 +59,7 @@ spring:
             hibernate.cache.use_second_level_cache: false
             hibernate.cache.use_query_cache: false
             hibernate.generate_statistics: true
+            hibernate.format_sql: true
     liquibase:
         contexts: dev
     mail:
@@ -94,7 +96,7 @@ jhipster:
         authentication:
             jwt:
                 # This token must be encoded using Base64 and be at least 256 bits long (you can type `openssl rand -base64 64` on your command line to generate a 512 bits one)
-                base64-secret: NmRlYTE4YjJhOWE1NDhhOTRjOGE2OTU5MTVlZWE1NjJmOTA3MTVhZGZlOWY1NTBlOTk0Y2QxZTc4ZWQ3ZDQxMTc5YzhiM2U4M2E5Y2NkNWFjMGNlYjdmYTc2NDIyMjU3ZDZiNWRkOTRkNzMyMjVhOTg1ZDM4M2NjNDhmOTE1NTE=
+                base64-secret: MzQ3NmNkOTA0MGUyYWFjNjZlM2E3NmRmNDM4YWFjNmQxNzFhYTY1ZDllZjljMjQ0MWNiYzc2N2U3NDgwMTlkMzk0MjhlNTUwODFlMDQyY2I1MWVlOGE5MDM1YjY0ODMwMzFlMThiMDFkMzVmNTc1NmFjNGY1MmQyMWVjMjQ0Mjc=
                 # Token is valid 24 hours
                 token-validity-in-seconds: 86400
                 token-validity-in-seconds-for-remember-me: 2592000

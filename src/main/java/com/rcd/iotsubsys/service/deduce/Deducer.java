@@ -156,10 +156,10 @@ public class Deducer implements Runnable {
         /**
          * 订阅主题
          * */
-        if (!subscribed) {
-            subscribed = true;
-            SubscribeUtil.subscribe(SubscribeUtil.TOPIC_TELEMTRY);
-        }
+//        if (!subscribed) {
+//            subscribed = true;
+//            SubscribeUtil.subscribe(SubscribeUtil.TOPIC_TELEMTRY);
+//        }
         KnowledgeComplexEvent complexEvent = (KnowledgeComplexEvent) complexEventService.getComplexEventById(complexId).getData();
 
         JsonResult<Object> result = complexEventService.getAllSubEvent(complexId);
@@ -302,6 +302,8 @@ public class Deducer implements Runnable {
             String targetRelation = '(' + complexEvent.getIdTargetRelation() + ')';
 
             Map<Long, BoolExpr> quantifierMap = new HashMap<>();
+
+            LOGGER.info("begin make logic expr...");
 
             FuncDecl[] funcDecls = new FuncDecl[allAttrRelation.size()];
 
@@ -687,6 +689,7 @@ public class Deducer implements Runnable {
                 LOGGER.info("deduce result : complex event found!!!!!!!!!!!!!!!!!!!");
                 deduceContext.foundComplexEvent(complexId);
                 String pubMessage = "<SYSTEM_CATE>"+complexId+1 + "</SYSTEM_CATE>";
+                LOGGER.info(pubMessage);
                 PublishUtil.publish(PublishUtil.DEVICE_FAILURE_MORE, pubMessage);
                 LOGGER.info("publish message, topic :" + PublishUtil.DEVICE_FAILURE_MORE + ", message" + pubMessage);
             } else {

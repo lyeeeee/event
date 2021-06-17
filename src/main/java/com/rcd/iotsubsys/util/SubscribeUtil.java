@@ -1,6 +1,8 @@
 package com.rcd.iotsubsys.util;
 
 import com.rcd.iotsubsys.wsn.subscribe.soap.Trans;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -12,6 +14,8 @@ import java.util.Map;
  */
 public class SubscribeUtil {
 
+    private static Logger logger = LoggerFactory.getLogger(SubscribeUtil.class);
+
     // 当前默认为
     private static final String WSN_ADDR = "http://"+ System.getProperty("subscribe_wsn_addr")+ "/wsn-core";//固定，发布订阅机器ip
     // 当前默认为
@@ -22,7 +26,9 @@ public class SubscribeUtil {
 
 
     public static void subscribe(String topic) {
+        logger.info("topic:{}, WSN_ADDR:{}, SENT_ADDR:{}", topic, WSN_ADDR, SENT_ADDR);
         Trans trans = new Trans(SENT_ADDR,WSN_ADDR,topic);
         trans.subscribe();
+        logger.info("topic subscribe done");
     }
 }

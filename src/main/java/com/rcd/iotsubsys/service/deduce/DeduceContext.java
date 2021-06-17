@@ -36,6 +36,8 @@ public class DeduceContext {
 
     public static BlockingQueue<KnowledgeComplexEvent> complexEventFounded = new LinkedBlockingQueue<>();
 
+    public static BlockingQueue<KnowledgeComplexEvent> complexEventFoundedForZX = new LinkedBlockingQueue<>();
+
     @Autowired
     private ComplexEventService complexEventService;
 
@@ -50,6 +52,7 @@ public class DeduceContext {
     public void foundComplexEvent(Long complexEventId) {
         KnowledgeComplexEvent data = (KnowledgeComplexEvent) this.complexEventService.getComplexEventById(complexEventId).getData();
         complexEventFounded.offer(data);
+        complexEventFoundedForZX.offer(data);
         complexEventService.saveAlarm(data);
     }
 

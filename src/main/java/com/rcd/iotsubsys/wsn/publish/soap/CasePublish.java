@@ -10,9 +10,11 @@ package com.rcd.iotsubsys.wsn.publish.soap; /**
 public class CasePublish {
     private Trans trans;
 	//wsn程序中的地址
-    public static String wsnAddr = "http://127.0.0.1:9011/wsn-core";
+    public static String wsnAddr = "http://10.109.253.3:9011/wsn-core";
+    //public static String wsnAddr = "http://localhost:9011/wsn-core";
 	//sendAddr中保证不和其他发布程序的端口冲突
-    public static String sendAddr = "http://127.0.0.1:9030/wsn-send";
+    public static String sendAddr = "http://10.28.193.98:9033/wsn-send";
+    //public static String sendAddr = "http://localhost:9033/wsn-send";
     public CasePublish(String sendAddr,String wsnAddr,String topic)
     {
         trans = new Trans(sendAddr,wsnAddr,topic);

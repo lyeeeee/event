@@ -198,6 +198,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.jena/jena-tdb
     compile group: 'org.apache.jena', name: 'jena-tdb', version: '3.13.1'
     // https://mvnrepository.com/artifact/org.sosy-lab/javasmt-solver-z3
+    // https://mvnrepository.com/artifact/com.microsoft.z3/javaAPI
+//    compile group: 'com.microsoft.z3', name: 'javaAPI', version: '4.8.8'
+
     compile group: 'org.sosy-lab', name: 'javasmt-solver-z3', version: 'z3-4.4.1-1558-gf96cfea'
     compile group: 'redis.clients', name: 'jedis', version: '3.1.0'
     compile group: "io.github.jhipster", name: "jhipster-framework"

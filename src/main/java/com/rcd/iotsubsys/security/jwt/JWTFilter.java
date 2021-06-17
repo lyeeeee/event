@@ -30,9 +30,11 @@ public class JWTFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
         throws IOException, ServletException {
+        logger.info("do filter beg..");
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         String jwt = resolveToken(httpServletRequest);
         if (StringUtils.hasText(jwt) && this.tokenProvider.validateToken(jwt)) {
+            logger.info("do filter, has jwt..");
             Authentication authentication = this.tokenProvider.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
